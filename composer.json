@@ -7,19 +7,11 @@
         "framework"
     ],
     "license": "MIT",
-
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/Kahoiz/exception-logger"
-        }
-    ],
-
     "require": {
         "php": "^8.2",
-        "kahoiz/exception-logger": "3.x-dev",
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
+        "nesbot/carbon": "^3.8",
         "php-amqplib/php-amqplib": "^3.7",
         "vladimir-yuldashev/laravel-queue-rabbitmq": "^14.1"
     },

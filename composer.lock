@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a668ef032543438c85047b4631f381ab",
+    "content-hash": "ddd55e456f6acf0dd55ae1b9f7ef7795",
     "packages": [
         {
             "name": "brick/math",
@@ -1055,117 +1055,17 @@
             "time": "2023-12-03T19:50:20+00:00"
         },
         {
-            "name": "kahoiz/exception-logger",
-            "version": "3.x-dev",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Kahoiz/exception-logger.git",
-                "reference": "7089247ab2ec1f69734688b5b7949c411a80aa12"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Kahoiz/exception-logger/zipball/7089247ab2ec1f69734688b5b7949c411a80aa12",
-                "reference": "7089247ab2ec1f69734688b5b7949c411a80aa12",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/contracts": "^8.0 || ^9.0 || ^10.0 || ^11.0",
-                "php": "^8.0, ^8.1,^8.2,^8.3"
-            },
-            "require-dev": {
-                "nunomaduro/collision": "^5.0||^8.1.1||^7.10.0",
-                "orchestra/testbench": "^6.0||^9.0.0||^8.22.0",
-                "phpstan/phpstan": "^1.5.6",
-                "phpunit/phpunit": "^9.3.3 || ^10.0 || ^11.0"
-            },
-            "default-branch": true,
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "2.x-dev"
-                },
-                "laravel": {
-                    "providers": [
-                        "kahoiz\\ExceptionLogger\\ExceptionLoggerServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "kahoiz\\ExceptionLogger\\": "src"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "kahoiz\\ExceptionLogger\\Tests\\": "tests"
-                }
-            },
-            "scripts": {
-                "lint:rector": [
-                    "@fix:rector --dry-run"
-                ],
-                "lint:ecs": [
-                    "ecs check --ansi"
-                ],
-                "lint:phpstan": [
-                    "phpstan analyse --ansi"
-                ],
-                "fix:rector": [
-                    "rector process --ansi"
-                ],
-                "fix:ecs": [
-                    "@lint:ecs --fix"
-                ],
-                "test:phpunit": [
-                    "phpunit --colors=always"
-                ],
-                "lint": [
-                    "@lint:rector",
-                    "@lint:ecs",
-                    "@lint:phpstan"
-                ],
-                "fix": [
-                    "@fix:rector",
-                    "@fix:ecs"
-                ],
-                "test": [
-                    "@test:phpunit"
-                ]
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "A simple exception logger for PHP",
-            "keywords": [
-                "exception",
-                "logging",
-                "package",
-                "php"
-            ],
-            "support": {
-                "source": "https://github.com/Kahoiz/exception-logger/tree/3.x",
-                "issues": "https://github.com/Kahoiz/exception-logger/issues"
-            },
-            "funding": [
-                {
-                    "type": "custom",
-                    "url": "https://www.paypal.com/paypalme/zingimmick"
-                }
-            ],
-            "time": "2024-11-15T12:00:49+00:00"
-        },
-        {
             "name": "laravel/framework",
-            "version": "v11.31.0",
+            "version": "v11.32.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "365090ed2c68244e3141cdb5e247cdf3dfba2c40"
+                "reference": "bc2aad63f83ee5089be7b21cf29d645ccf31e927"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/365090ed2c68244e3141cdb5e247cdf3dfba2c40",
-                "reference": "365090ed2c68244e3141cdb5e247cdf3dfba2c40",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/bc2aad63f83ee5089be7b21cf29d645ccf31e927",
+                "reference": "bc2aad63f83ee5089be7b21cf29d645ccf31e927",
                 "shasum": ""
             },
             "require": {
@@ -1361,7 +1261,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2024-11-12T15:36:15+00:00"
+            "time": "2024-11-15T17:04:33+00:00"
         },
         {
             "name": "laravel/prompts",
@@ -8307,9 +8207,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "kahoiz/exception-logger": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
