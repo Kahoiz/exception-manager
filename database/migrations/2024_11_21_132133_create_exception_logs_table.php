@@ -14,12 +14,16 @@ return new class extends Migration
         Schema::create('exception_logs', function (Blueprint $table) {
             $table->id();
             $table->string('type');
+            $table->string('code');
             $table->text('message');
             $table->string('file');
             $table->integer('line');
             $table->text('trace');
-            $table->string('uuid');
-            $table->string('environment');
+            $table->string('uuid')->nullable();
+            $table->string('application');
+            $table->integer('user_id')->nullable();
+            $table->unsignedBigInteger('previous_log_id')->nullable();
+            $table->foreign('previous_log_id')->references('id')->on('exception_logs')->cascadeOnDelete();
             $table->timestamp('thrown_at');
             $table->timestamps();
         });
