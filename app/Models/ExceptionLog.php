@@ -33,10 +33,10 @@ class ExceptionLog extends Model
 
         foreach ($bundle as $logTrace) {
             $previousLogId = null;
-            //reverse the list so we can start from the first log
+            //reverse the list so we can start from the first log in the trace
             foreach (array_reverse($logTrace) as $log) {
                 $log['previous_log_id'] = $previousLogId;
-                dump($log);
+
                 $previousLogId = self::create($log)->id;
             }
         }
