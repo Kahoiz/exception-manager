@@ -13,6 +13,7 @@
         "laravel/tinker": "^2.9",
         "nesbot/carbon": "^3.8",
         "php-amqplib/php-amqplib": "^3.7",
+        "spatie/laravel-slack-alerts": "^1.5",
         "vladimir-yuldashev/laravel-queue-rabbitmq": "^14.1"
     },
     "require-dev": {

@@ -9,8 +9,9 @@ class UserAnalysis
     {
         return $exceptions
             ->groupBy('user_id')
-            ->map(fn($logs, $user_id) => ['user_id' => $user_id, 'count' => count($logs)])
-            ->values()
+            ->map(fn($group) => $group->count())
+            ->sortDesc()
+            ->take(5)
             ->toArray();
     }
 }

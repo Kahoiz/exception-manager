@@ -2,10 +2,13 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\PersistException;
 use App\Models\ExceptionLog;
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Queue;
 use App\Jobs\AnalyseException;
+use Spatie\SlackAlerts\Facades\SlackAlert;
 
 class ProcessNewExceptions extends Command
 {
@@ -18,45 +21,34 @@ class ProcessNewExceptions extends Command
         $logs = [];
         $limit = 500;
         try {
-
             while ($message = Queue::pop('new-exception')) {
                 $logs[] = $this->transform($message, $time);
-                //For some reason the message is not deleted automatically
-                $message->delete();
+                $message->delete(); //the message is not deleted automatically
 
-                //To prevent the command from potentially running out of memory
+                //prevent the command from potentially running out of memory
                 if (count($logs) >= $limit) {
                     $this->info('Inserting ' . count($logs) . ' exceptions into the database');
-                    ExceptionLog::insertLogs($logs);
-                    $logs = $this->trimLogs($logs);
                     $this->dispatchJobs($logs);
                     $logs = [];
                 }
             }
         } finally {
             if (!empty($logs)) { //If the queue is empty when the command runs, the logs array will be empty
-                $this->info('Inserting ' . count($logs) . ' exceptions into the database');
-                ExceptionLog::insertLogs($logs);
-                $logs = $this->trimLogs($logs);
                 $this->dispatchJobs($logs);
-
-
             }
         }
     }
 
     private function transform($message, $time): array
     {
-        //There's no reason to store the payload as ExceptionLog object, since we'll have to transform it
-        //back to an array to store it in bulk in the database
-        //Well just transform it to an array here and now
         $log = $message->payload();
+
         $logList = [];
-        //The log can be nested with previous logs,
+
         while ($log) {
             $log['created_at'] = $time;
             $log['updated_at'] = $time;
-            $logList[] = array_diff_key($log, ['previous' => '']);
+            $logList[] = array_diff_key($log, ['previous' => '']); //avoid circular reference
             $log = $log['previous'] ?? null;
         }
         return $logList;
@@ -64,23 +56,26 @@ class ProcessNewExceptions extends Command
 
     private function dispatchJobs($logs): void
     {
+        $this->info('Dispatching job to insert ' . count($logs) . ' exceptions and subsidiaries into the database');
 
-        //Dispatch a job per application to keep them isolated from each other
-        $bundle = collect($logs)->groupBy('application')->toArray();
+        PersistException::dispatchSync($logs);
+//        PersistException::dispatch($logs)->onQueue('persist-exception');
 
-        foreach ($bundle as $application => $bundledLogs) {
+        //We only want the first exception in the chain sent to analysis, so the rest are removed
+        $logs = $this->trimAndGroupLogs($logs);
+        foreach ($logs as $application => $bundledLogs) {
             $this->info('Dispatching job to analyse ' . count($bundledLogs) . ' exceptions from ' . $application);
-            AnalyseException::dispatchSync($logs);
+            AnalyseException::dispatchSync($bundledLogs, $application);
 //            AnalyseException::dispatch($logs)->onQueue('analyse-exception');
         }
     }
 
-    private function trimLogs(array $logs): array
+    private function trimAndGroupLogs(array $logs): array
     {
-        //We only want the first exception in the chain sent to analysis, so the rest are removed
-        return  array_map(static function($log) {
+        $trimmedLogs = array_map(static function ($log) {
             return $log[0];
         }, $logs);
+        return collect($trimmedLogs)->groupBy('application')->toArray();
     }
 
 }

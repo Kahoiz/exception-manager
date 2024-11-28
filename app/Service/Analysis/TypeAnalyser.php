@@ -8,8 +8,9 @@ class TypeAnalyser
     {
         return $exceptions
             ->groupBy('type')
-            ->map(fn($logs, $type) => ['type' => $type, 'count' => count($logs)])
-            ->values()
+            ->map(fn($group) => $group->count())
+            ->sortDesc()
+            ->take(5)
             ->toArray();
     }
 }
