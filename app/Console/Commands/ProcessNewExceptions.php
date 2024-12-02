@@ -32,7 +32,7 @@ class ProcessNewExceptions extends Command
                     $logs = [];
                 }
             }
-        } finally {
+        } finally { //In case of errors or if the queue has been emptied
             if (!empty($logs)) { //If the queue is empty when the command runs, the logs array will be empty
                 $this->dispatchJobs($logs);
             }
