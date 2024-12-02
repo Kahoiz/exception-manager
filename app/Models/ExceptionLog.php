@@ -40,8 +40,8 @@ class ExceptionLog extends Model
                 $previousLogId = self::create($log)->id;
             }
         }
-
     }
-
-
+    protected $casts = [
+        'thrown_at' => 'datetime',
+    ];
 }

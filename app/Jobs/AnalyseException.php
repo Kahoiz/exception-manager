@@ -22,9 +22,6 @@ class AnalyseException implements ShouldQueue
         $this->exceptionLogs = $exceptionLogs;
         $this->application = $application;
         $this->firstThrown = $exceptionLogs[0]['thrown_at']; //The logs are in chronological order
-
-
-
     }
 
 
@@ -34,9 +31,11 @@ class AnalyseException implements ShouldQueue
         $analyser = new ExceptionAnalyser($this->exceptionLogs);
         $result = $analyser->analyse();
         //do stuff with the result
-        dump($result);
-        $this->notifySpikeWithBlocks($result);
 
+        //build the slack message
+        if($result['spike']) {
+            $this->notifySpikeWithBlocks($result);
+        }
     }
 
     private function notifySpikeWithBlocks($result): void

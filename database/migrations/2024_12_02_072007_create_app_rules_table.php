@@ -17,6 +17,22 @@ return new class extends Migration
             $table->text('value');
             $table->timestamps();
         });
+
+        Schema::create('spike_rules', function (Blueprint $table) {
+            $table->id();
+            $table->string('application')->unique();
+            $table->float('alpha');
+            $table->integer('threshold');
+            $table->float('last_ema');
+            $table->timestamps();
+        });
+
+        Schema::create('exponential_moving_average', function (Blueprint $table) {
+            $table->id();
+            $table->float('EMA');
+            $table->integer('count');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -25,5 +41,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('app_rules');
+        Schema::dropIfExists('spike_rules');
     }
 };
