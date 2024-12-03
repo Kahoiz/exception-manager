@@ -31,6 +31,7 @@ return new class extends Migration
             $table->id();
             $table->float('EMA');
             $table->integer('count');
+            $table->string('application');
             $table->timestamps();
         });
     }
@@ -42,5 +43,6 @@ return new class extends Migration
     {
         Schema::dropIfExists('app_rules');
         Schema::dropIfExists('spike_rules');
+        Schema::dropIfExists('exponential_moving_average');
     }
 };

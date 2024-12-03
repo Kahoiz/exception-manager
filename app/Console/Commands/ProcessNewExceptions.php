@@ -13,39 +13,50 @@ use Spatie\SlackAlerts\Facades\SlackAlert;
 class ProcessNewExceptions extends Command
 {
     protected $signature = 'mq:process';
-    protected $description = 'Listens for new exceptions in the queue and spins up jobs';
+    protected $description = 'Empties a queue and spins up jobs in batches';
+    private CONST LIMIT = 500;
 
     public function handle(): void
     {
         $time = now()->format('Y-m-d H:i:s');
-        $logs = [];
-        $limit = 500;
+        $persistLogs = []; //to be inserted into the database
+
+        $analyseLogs = []; //to be analysed
         try {
             while ($message = Queue::pop('new-exception')) {
-                $logs[] = $this->transform($message, $time);
+
+                $log = $message->payload();
+                $persistLogs[] = $this->transform($log, $time);
+
+                unset($log['previous']); //not needed for analysis
+
+                $analyseLogs[] = $log;
+
                 $message->delete(); //the message is not deleted automatically
 
-                //prevent the command from potentially running out of memory
-                if (count($logs) >= $limit) {
-                    $this->info('Inserting ' . count($logs) . ' exceptions into the database');
-                    $this->dispatchJobs($logs);
-                    $logs = [];
+                if (count($persistLogs) >= self::LIMIT) {//prevent the command from potentially running out of memory
+                    $this->info('Inserting ' . count($persistLogs) . ' exceptions into the database');
+                    $this->dispatchJobs($persistLogs,$analyseLogs);
+                    $persistLogs = [];
+                    $analyseLogs = [];
                 }
             }
-        } finally { //In case of errors or if the queue has been emptied
-            if (!empty($logs)) { //If the queue is empty when the command runs, the logs array will be empty
-                $this->dispatchJobs($logs);
+        }
+        finally { //In case of errors or if the queue has been emptied
+            if (!empty($persistLogs)) {
+                $this->info('Inserting ' . count($persistLogs) . ' exceptions into the database');
+                $this->dispatchJobs($persistLogs,$analyseLogs);
             }
         }
     }
 
-    private function transform($message, $time): array
+    private function transform($log, $time): array
     {
-        $log = $message->payload();
 
         $logList = [];
 
         while ($log) {
+
             $log['created_at'] = $time;
             $log['updated_at'] = $time;
             $logList[] = array_diff_key($log, ['previous' => '']); //avoid circular reference
@@ -54,29 +65,18 @@ class ProcessNewExceptions extends Command
         return $logList;
     }
 
-    private function dispatchJobs($logs): void
+    private function dispatchJobs($persistLogs, $analyseLogs): void
     {
-        $this->info('Dispatching job to insert ' . count($logs) . ' exceptions and subsidiaries into the database');
+        $this->info('Dispatching job to insert ' . count($persistLogs) . ' exceptions and subsidiaries into the database');
 
-        PersistException::dispatchSync($logs);
-//        PersistException::dispatch($logs)->onQueue('persist-exception');
+        PersistException::dispatchSync($persistLogs);
 
-        //We only want the first exception in the chain sent to analysis, so the rest are removed
-        $logs = $this->trimAndGroupLogs($logs);
-        foreach ($logs as $application => $bundledLogs) {
+        $analyseLogs = collect($analyseLogs)->unique('application')->toArray();
+        foreach ($analyseLogs as $application => $bundledLogs) { //analyse logs per application
             $this->info('Dispatching job to analyse ' . count($bundledLogs) . ' exceptions from ' . $application);
             AnalyseException::dispatchSync($bundledLogs, $application);
-//            AnalyseException::dispatch($logs)->onQueue('analyse-exception');
+
         }
     }
-
-    private function trimAndGroupLogs(array $logs): array
-    {
-        $trimmedLogs = array_map(static function ($log) {
-            return $log[0];
-        }, $logs);
-        return collect($trimmedLogs)->groupBy('application')->toArray();
-    }
-
 }
 

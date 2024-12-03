@@ -2,10 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 
-
+//To test if the application is alive and running
 Route::get('/', function () {
-dd("din mor");
+    return response()->json(['message' => 'Healthy']);
 });
-Route::post('/log', function () {
-    return response()->json(['message' => 'Logged']);
-});
+

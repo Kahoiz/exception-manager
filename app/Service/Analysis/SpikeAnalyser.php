@@ -38,12 +38,11 @@ class SpikeAnalyser
             $previousEMA = $exceptionsCount;
         }
 
-
         $ema = $alpha * $exceptionsCount + (1 - $alpha) * $previousEMA;
 
         DB::table('spike_rules')->where('application', $application)->update(['last_ema' => $ema]);
 
-        DB::table('exponential_moving_average')->insert(['EMA' => $ema, 'count' => $exceptionsCount]);
+        DB::table('exponential_moving_average')->insert(['EMA' => $ema, 'count' => $exceptionsCount, 'application' => $application]);
 
 
         return $exceptionsCount > $ema + $threshold;

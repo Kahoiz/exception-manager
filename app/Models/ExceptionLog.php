@@ -28,7 +28,7 @@ class ExceptionLog extends Model
         return $this->belongsTo(__CLASS__, 'previous_log_id');
     }
 
-    public static function insertLogs(array $bundle)
+    public static function insertLogs(array $bundle): void
     {
 
         foreach ($bundle as $logTrace) {
