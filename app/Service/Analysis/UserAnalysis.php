@@ -2,7 +2,7 @@
 
 namespace App\Service\Analysis;
 
-class UserAnalysis
+class UserAnalysis implements Analyser
 {
 
     public static function analyse($exceptions)

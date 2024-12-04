@@ -5,13 +5,14 @@ use App\Models\SpikeRules;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-class SpikeAnalyser
+class SpikeAnalyser implements Analyser
 {
 
 
-    public static function analyse($exceptions,$application): bool
+    public static function analyse($exceptions): bool
     {
-
+        //get application from the exceptions array
+        $application = $exceptions->first()['application'];
         if($exceptions->isEmpty()) {
             return false;
         }

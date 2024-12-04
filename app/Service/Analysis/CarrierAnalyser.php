@@ -2,9 +2,9 @@
 
 namespace App\Service\Analysis;
 
-class CarrierAnalyser
+class CarrierAnalyser implements Analyser
 {
-    public static function analyse($exceptions, $type)
+    public static function analyse($exceptions) : string
     {
 
 
@@ -27,14 +27,10 @@ class CarrierAnalyser
         }
 
         arsort($carrierCounts);
-        //if the first key is more than 80% of the sum of the array, return the name of the carrier else return carrierexception
-        $collection =  collect($carrierCounts);
 
-        if ($collection->first() > $collection->sum() * 0.8) {
-
-            return $collection->keys()->first();
-        }
-        return $type;
+        return array_key_first($carrierCounts);
 
     }
+
 }
+

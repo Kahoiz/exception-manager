@@ -2,7 +2,7 @@
 
 namespace App\Service\Analysis;
 
-class TypeAnalyser
+class TypeAnalyser implements Analyser
 {
     public static function analyse($exceptions)
     {
@@ -14,7 +14,7 @@ class TypeAnalyser
             ->toArray();
     }
 
-    private static function makeTestList()
+    public static function makeTestList()
     {
         $data = [
             'app/Models/Carriers/IcaPaket/Modules/ShipmentModule.php',
@@ -59,11 +59,7 @@ class TypeAnalyser
 
         arsort($testList);
 
-        $collection =  collect($testList);
+        return array_key_first($testList);
 
-        if ($collection->first() > $collection->sum() * 0.8) {
-            return $collection->keys()->first();
-        }
-        return $testList->first()['type'];
     }
 }

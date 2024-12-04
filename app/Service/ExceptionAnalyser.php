@@ -3,11 +3,9 @@
 namespace App\Service;
 
 use App\Models\Cause;
-use App\Service\Analysis\MessageAnalyser;
+use App\Service\Analysis\CarrierAnalyser;
 use App\Service\Analysis\SpikeAnalyser;
 use App\Service\Analysis\TypeAnalyser;
-use App\Service\Analysis\UserAnalysis;
-use App\Service\Analysis\VolumeAnalyser;
 use Illuminate\Support\Collection;
 
 class ExceptionAnalyser
@@ -28,15 +26,18 @@ class ExceptionAnalyser
         return SpikeAnalyser::analyse($this->exceptions, $this->application);
     }
 
-    public function findCause() : Cause
+    public function findCause()
     {
         $types = TypeAnalyser::analyse($this->exceptions);
         //if the types array contains CarrierException, do stuff
         foreach($types as $type => $count){
+
             if(str_contains($type, 'CarrierException')){
-                $carrier = TypeAnalyser::determineCarrier($this->exceptions, $type);
+
+                $carrier = CarrierAnalyser::analyse($this->exceptions->groupBy('type')->get($type));
                 break;
             }
+
         }
 
 
