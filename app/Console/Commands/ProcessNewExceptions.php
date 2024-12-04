@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\PersistException;
+use App\Jobs\SpikeDetection;
 use App\Models\ExceptionLog;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
@@ -59,7 +60,7 @@ class ProcessNewExceptions extends Command
 
             $log['created_at'] = $time;
             $log['updated_at'] = $time;
-            $logList[] = array_diff_key($log, ['previous' => '']); //avoid circular reference
+            $logList[] = array_diff_key($log, ['previous' => '']); //avoid data clutter
             $log = $log['previous'] ?? null;
         }
         return $logList;
@@ -71,12 +72,12 @@ class ProcessNewExceptions extends Command
 
         PersistException::dispatchSync($persistLogs);
 
-        $analyseLogs = collect($analyseLogs)->unique('application')->toArray();
-        foreach ($analyseLogs as $application => $bundledLogs) { //analyse logs per application
-            $this->info('Dispatching job to analyse ' . count($bundledLogs) . ' exceptions from ' . $application);
-            AnalyseException::dispatchSync($bundledLogs, $application);
-
+        $analyseLogs = collect($analyseLogs)->groupBy('application');
+        foreach($analyseLogs as $application => $logs){
+            $this->info('Dispatching job to analyse ' . count($analyseLogs) . ' from ' . $application);
+            AnalyseException::dispatchSync($logs,$application);
         }
+
     }
 }
 

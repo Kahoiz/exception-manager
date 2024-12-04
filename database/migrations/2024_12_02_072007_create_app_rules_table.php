@@ -6,28 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+
     public function up(): void
     {
-        Schema::create('app_rules', function (Blueprint $table) {
-            $table->id();
-            $table->string('key')->unique();
-            $table->text('value');
-            $table->timestamps();
-        });
 
         Schema::create('spike_rules', function (Blueprint $table) {
             $table->id();
             $table->string('application')->unique();
             $table->float('alpha');
             $table->integer('threshold');
-            $table->float('last_ema');
+            $table->float('last_ema')->nullable();
             $table->timestamps();
         });
 
-        Schema::create('exponential_moving_average', function (Blueprint $table) {
+        Schema::create('ema_history', function (Blueprint $table) {
             $table->id();
             $table->float('EMA');
             $table->integer('count');
@@ -41,8 +33,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('app_rules');
         Schema::dropIfExists('spike_rules');
-        Schema::dropIfExists('exponential_moving_average');
+        Schema::dropIfExists('ema_history');
     }
 };

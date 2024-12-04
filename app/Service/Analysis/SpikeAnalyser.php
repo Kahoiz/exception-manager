@@ -1,17 +1,16 @@
 <?php
 
 namespace App\Service\Analysis;
+use App\Models\SpikeRules;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class SpikeAnalyser
 {
 
 
-    public static function analyse($exceptions): bool
+    public static function analyse($exceptions,$application): bool
     {
-        $alpha = 0.3;
-        $threshold = 50;
-
 
         if($exceptions->isEmpty()) {
             return false;
@@ -19,33 +18,35 @@ class SpikeAnalyser
 
         $exceptionsCount = $exceptions->count();
 
-        $application = $exceptions->first()['application'];
+        //get ruleset for application or create new with default values
+       $spikeRules = SpikeRules::where('application', $application)->first();
+        if(!$spikeRules) {
+            $data = [
+                'application' => $application,
+                'alpha' => 0.3,
+                'threshold' => 50,
+                'last_ema' => $exceptionsCount //Estimated Moving Average always starts with the first exception count
+            ];
 
-
-        //get last EMA
-       $spikeRules = DB::table('spike_rules')->where('application', $application)->get();
-
-        if($spikeRules->isEmpty()) {
-            DB::table('spike_rules')->insert(['application' => $application, 'alpha' => $alpha, 'threshold' => $threshold, 'last_ema' => 0]);
+            $spikeRules = SpikeRules::create($data);
         }
 
-        $alpha = $spikeRules->value('alpha');
-        $threshold = $spikeRules->value('threshold');
-        $previousEMA = $spikeRules->value('last_ema');
-
-        //check if last EMA is 0 and set it to the current exception count if null
-        if($previousEMA <=0) {
-            $previousEMA = $exceptionsCount;
-        }
+        $alpha = $spikeRules->alpha;
+        $threshold = $spikeRules->threshold;
+        $previousEMA = $spikeRules->last_ema;
 
         $ema = $alpha * $exceptionsCount + (1 - $alpha) * $previousEMA;
 
-        DB::table('spike_rules')->where('application', $application)->update(['last_ema' => $ema]);
+        $spikeRules->last_ema = $ema;
 
-        DB::table('exponential_moving_average')->insert(['EMA' => $ema, 'count' => $exceptionsCount, 'application' => $application]);
+        $spikeRules->save();
+
+        //save ema history
+        DB::table('ema_history')->insert(['EMA' => $ema, 'count' => $exceptionsCount, 'application' => $application]);
 
 
         return $exceptionsCount > $ema + $threshold;
     }
+
 }
 
