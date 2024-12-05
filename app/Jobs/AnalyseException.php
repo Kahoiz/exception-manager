@@ -27,14 +27,13 @@ class AnalyseException implements ShouldQueue
 
 
     public function handle(): void
-    {   $analyser = new ExceptionAnalyser($this->exceptionLogs, $this->application);
-//        $spike = $analyser->detectSpike();
-        $analyser->findCause();
+    {
+        $analyser = $exceptionAnalyser = app(ExceptionAnalyser::class);
+
+        $spike = $analyser->detectSpike($this->exceptionLogs, $this->application);
+        $analyser->findCause($this->exceptionLogs, $this->application);
         if (!$spike) {
             return;
         }
-
-
-        $analyser->findCause();
     }
 }

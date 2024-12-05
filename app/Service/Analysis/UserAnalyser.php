@@ -2,10 +2,10 @@
 
 namespace App\Service\Analysis;
 
-class UserAnalysis implements Analyser
+class UserAnalyser implements IUserAnalyser
 {
 
-    public static function analyse($exceptions)
+    public function analyse($exceptions)
     {
         return $exceptions
             ->groupBy('user_id')

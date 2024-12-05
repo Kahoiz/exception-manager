@@ -2,14 +2,11 @@
 
 namespace App\Service\Analysis;
 use App\Models\SpikeRules;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-class SpikeAnalyser implements Analyser
+class SpikeAnalyser implements ISpikeAnalyser
 {
-
-
-    public static function analyse($exceptions): bool
+    public function DetectSpike($exceptions): bool
     {
         //get application from the exceptions array
         $application = $exceptions->first()['application'];
@@ -48,6 +45,4 @@ class SpikeAnalyser implements Analyser
 
         return $exceptionsCount > $ema + $threshold;
     }
-
 }
-

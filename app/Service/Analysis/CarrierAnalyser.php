@@ -2,9 +2,9 @@
 
 namespace App\Service\Analysis;
 
-class CarrierAnalyser implements Analyser
+class CarrierAnalyser implements ICarrierAnalyser
 {
-    public static function analyse($exceptions) : string
+    public function analyse($exceptions) : string
     {
 
 

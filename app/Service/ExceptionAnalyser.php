@@ -3,46 +3,46 @@
 namespace App\Service;
 
 use App\Models\Cause;
-use App\Service\Analysis\CarrierAnalyser;
-use App\Service\Analysis\SpikeAnalyser;
-use App\Service\Analysis\TypeAnalyser;
+use App\Service\Analysis\ICarrierAnalyser;
+use App\Service\Analysis\ISpikeAnalyser;
+use App\Service\Analysis\ITypeAnalyser;
 use Illuminate\Support\Collection;
 
 class ExceptionAnalyser
 {
+    private ITypeAnalyser $typeAnalyser;
+    private ICarrierAnalyser $carrierAnalyser;
+    private ISpikeAnalyser $spikeAnalyser;
 
-    protected Collection $exceptions;
-    protected string $application;
 
-    public function __construct($exceptions, $application)
+    //All the analysers are injected into the constructor
+    public function __construct(
+                                ITypeAnalyser $typeAnalyser,
+                                ICarrierAnalyser $carrierAnalyser,
+                                ISpikeAnalyser $spikeAnalyser)
     {
-        $this->exceptions = collect($exceptions);
-        $this->application = $application;
-
+        $this->typeAnalyser = $typeAnalyser;
+        $this->carrierAnalyser = $carrierAnalyser;
+        $this->spikeAnalyser = $spikeAnalyser;
     }
 
-    public function detectSpike(): bool
+    public function detectSpike($exceptionLogs, $application): bool
     {
-        return SpikeAnalyser::analyse($this->exceptions, $this->application);
+        return $this->spikeAnalyser->DetectSpike($exceptionLogs , $application);
     }
 
-    public function findCause()
+    public function findCause($exceptionLogs, $application)
     {
-        $types = TypeAnalyser::analyse($this->exceptions);
+
+        $types = $this->typeAnalyser->analyse($exceptionLogs);
         //if the types array contains CarrierException, do stuff
-        foreach($types as $type => $count){
-
-            if(str_contains($type, 'CarrierException')){
-
-                $carrier = CarrierAnalyser::analyse($this->exceptions->groupBy('type')->get($type));
+        foreach ($types as $type => $count) {
+            if (str_contains($type, 'CarrierException')) {
+                $carrier = $this->carrierAnalyser::analyse($exceptionLogs
+                    ->groupBy('type')
+                    ->get($type));
                 break;
             }
-
         }
-
-
-
     }
-
-
 }

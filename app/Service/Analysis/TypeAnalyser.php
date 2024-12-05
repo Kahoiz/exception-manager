@@ -2,9 +2,9 @@
 
 namespace App\Service\Analysis;
 
-class TypeAnalyser implements Analyser
+class TypeAnalyser implements ITypeAnalyser
 {
-    public static function analyse($exceptions)
+    public function analyse($exceptions)
     {
         return $exceptions
             ->groupBy('type')
