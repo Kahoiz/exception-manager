@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Service\Analysis;
+namespace App\Service\Analysis\Interfaces;
+
+use App\Service\Analysis\Collection;
 
 interface SpikeAnalyserInterface
 {

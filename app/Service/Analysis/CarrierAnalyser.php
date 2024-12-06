@@ -2,6 +2,8 @@
 
 namespace App\Service\Analysis;
 
+use App\Service\Analysis\Interfaces\CarrierAnalyserInterface;
+
 class CarrierAnalyser implements CarrierAnalyserInterface
 {
     public function analyse($exceptions) : string

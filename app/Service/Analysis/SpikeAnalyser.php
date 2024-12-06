@@ -1,23 +1,24 @@
 <?php
 
 namespace App\Service\Analysis;
+
 use App\Models\SpikeRules;
+use App\Service\Analysis\Interfaces\SpikeAnalyserInterface;
 use Illuminate\Support\Facades\DB;
 
 class SpikeAnalyser implements SpikeAnalyserInterface
 {
     public function detectSpike($exceptions, $application): bool
     {
-
-        if($exceptions->isEmpty()) {
+        if ($exceptions->isEmpty()) {
             return false;
         }
 
         $exceptionsCount = $exceptions->count();
 
         //get ruleset for application or create new with default values
-       $spikeRules = SpikeRules::where('application', $application)->first();
-        if(!$spikeRules) {
+        $spikeRules = SpikeRules::where('application', $application)->first();
+        if (!$spikeRules) {
             $data = [
                 'application' => $application,
                 'alpha' => 0.3,
@@ -39,7 +40,11 @@ class SpikeAnalyser implements SpikeAnalyserInterface
         $spikeRules->save();
 
         //save ema history
-        DB::table('ema_history')->insert(['EMA' => $ema, 'count' => $exceptionsCount, 'application' => $application]);
+        DB::table('ema_history')->insert([
+            'EMA' => $ema,
+            'count' =>
+                $exceptionsCount,
+            'application' => $application]);
 
 
         return $exceptionsCount > $ema + $threshold;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service\Analysis;
+namespace App\Service\Analysis\Interfaces;
 
 interface CarrierAnalyserInterface
 {

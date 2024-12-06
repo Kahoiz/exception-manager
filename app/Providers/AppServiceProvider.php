@@ -3,9 +3,9 @@
 namespace App\Providers;
 
 use App\Service\Analysis\CarrierAnalyser;
-use App\Service\Analysis\CarrierAnalyserInterface;
-use App\Service\Analysis\SpikeAnalyserInterface;
-use App\Service\Analysis\TypeAnalyserInterface;
+use App\Service\Analysis\Interfaces\CarrierAnalyserInterface;
+use App\Service\Analysis\Interfaces\SpikeAnalyserInterface;
+use App\Service\Analysis\Interfaces\TypeAnalyserInterface;
 use App\Service\Analysis\SpikeAnalyser;
 use App\Service\Analysis\TypeAnalyser;
 use Illuminate\Support\ServiceProvider;

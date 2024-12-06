@@ -2,6 +2,8 @@
 
 namespace App\Service\Analysis;
 
+use App\Service\Analysis\Interfaces\UserAnalyserInterface;
+
 class UserAnalyser implements UserAnalyserInterface
 {
 
