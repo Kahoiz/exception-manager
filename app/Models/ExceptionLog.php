@@ -30,7 +30,6 @@ class ExceptionLog extends Model
 
     public static function insertLogs(array $bundle): void
     {
-
         foreach ($bundle as $logTrace) {
             $previousLogId = null;
             //reverse the list so we can start from the first log in the trace

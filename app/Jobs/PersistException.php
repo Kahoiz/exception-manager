@@ -20,6 +20,5 @@ class PersistException implements ShouldQueue
     public function handle(): void
     {
         ExceptionLog::insertLogs($this->exceptionLogs);
-
     }
 }
