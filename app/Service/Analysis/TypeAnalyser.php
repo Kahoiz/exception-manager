@@ -2,7 +2,7 @@
 
 namespace App\Service\Analysis;
 
-class TypeAnalyser implements ITypeAnalyser
+class TypeAnalyser implements TypeAnalyserInterface
 {
     public function analyse($exceptions)
     {

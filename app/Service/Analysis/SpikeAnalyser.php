@@ -4,12 +4,11 @@ namespace App\Service\Analysis;
 use App\Models\SpikeRules;
 use Illuminate\Support\Facades\DB;
 
-class SpikeAnalyser implements ISpikeAnalyser
+class SpikeAnalyser implements SpikeAnalyserInterface
 {
-    public function DetectSpike($exceptions): bool
+    public function detectSpike($exceptions, $application): bool
     {
-        //get application from the exceptions array
-        $application = $exceptions->first()['application'];
+
         if($exceptions->isEmpty()) {
             return false;
         }

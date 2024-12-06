@@ -2,7 +2,7 @@
 
 namespace App\Service\Analysis;
 
-interface ITypeAnalyser
+interface CarrierAnalyserInterface
 {
     public function analyse($exceptions);
 }

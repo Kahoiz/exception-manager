@@ -2,7 +2,7 @@
 
 namespace App\Service\Analysis;
 
-interface IUserAnalyser
+interface TypeAnalyserInterface
 {
     public function analyse($exceptions);
 }
