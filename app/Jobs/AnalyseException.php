@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\Cause;
 use App\Service\ExceptionAnalyser;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -22,14 +23,19 @@ class AnalyseException implements ShouldQueue
         $this->application = $application;
     }
 
-    public function handle(): void
+    public function handle(ExceptionAnalyser $analyser): void
     {
-        $analyser = app(ExceptionAnalyser::class);
-
         $spike = $analyser->detectSpike($this->exceptionLogs, $this->application);
-        $analyser->findCause($this->exceptionLogs, $this->application);
+
+        $cause = $analyser->identifyCause($this->exceptionLogs);
+
+        $cause->application = $this->application;
+
+        $cause->save();
+
         if (!$spike) {
             return;
         }
+
     }
 }

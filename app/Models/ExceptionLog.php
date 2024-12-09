@@ -23,7 +23,7 @@ class ExceptionLog extends Model
         'previous_log_id',
     ];
 
-    public function previousLog()
+    public function previousLog(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(__CLASS__, 'previous_log_id');
     }

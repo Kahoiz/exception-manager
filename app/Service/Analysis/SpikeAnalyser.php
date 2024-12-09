@@ -34,7 +34,7 @@ class SpikeAnalyser implements SpikeAnalyserInterface
         $previousEMA = $spikeRules->last_ema;
 
         $ema = $alpha * $exceptionsCount + (1 - $alpha) * $previousEMA;
-
+        $ema = round($ema,2);
         $spikeRules->last_ema = $ema;
 
         $spikeRules->save();
@@ -45,10 +45,11 @@ class SpikeAnalyser implements SpikeAnalyserInterface
         // nor do we anticipate it to be used in the near future.
         // therefor we see no reason to extract this to a separate class.
         DB::table('ema_history')->insert([
-            'EMA' => $ema,
-            'count' =>
-                $exceptionsCount,
-            'application' => $application]);
+            'EMA'           => $ema,
+            'count'         => $exceptionsCount,
+            'application'   => $application,
+            'created_at'    => now(),
+            'updated_at'    => now()]);
 
         return $exceptionsCount > $ema + $threshold;
     }

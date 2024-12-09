@@ -8,6 +8,8 @@ use App\Service\Analysis\Interfaces\SpikeAnalyserInterface;
 use App\Service\Analysis\Interfaces\TypeAnalyserInterface;
 use App\Service\Analysis\SpikeAnalyser;
 use App\Service\Analysis\TypeAnalyser;
+use App\Service\ExceptionAnalyser;
+use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -23,13 +25,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Bind the ITypeAnalyser interface to the TypeAnalyser implementation
+        $this->app->singleton(ExceptionAnalyser::class, function ($app) {
+            return new ExceptionAnalyser(
+                $app->make(TypeAnalyserInterface::class),
+                $app->make(CarrierAnalyserInterface::class),
+                $app->make(SpikeAnalyserInterface::class)
+            );
+        });
+
         $this->app->bind(TypeAnalyserInterface::class, TypeAnalyser::class);
-
-        // Bind the ICarrierAnalyser interface to the CarrierAnalyser implementation
         $this->app->bind(CarrierAnalyserInterface::class, CarrierAnalyser::class);
-
-        // Bind the ISpikeAnalyser interface to the SpikeAnalyser implementation
         $this->app->bind(SpikeAnalyserInterface::class, SpikeAnalyser::class);
     }
 
@@ -41,6 +46,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Bootstrap code can be added here
+        Collection::macro('containsCarrierException', function () {
+            return $this->contains(function ($value) {
+                return str_contains($value, 'CarrierException');
+            });
+        });
+        Collection::macro('containsRequestException', function () {
+            return $this->contains(function ($value) {
+                return str_contains($value, 'RequestException');
+            });
+        });
     }
 }

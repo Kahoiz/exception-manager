@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Jobs\CarrierHealthCheck;
 use App\Models\Cause;
 use App\Service\Analysis\Interfaces\CarrierAnalyserInterface;
 use App\Service\Analysis\Interfaces\SpikeAnalyserInterface;
@@ -10,55 +11,46 @@ use Illuminate\Support\Collection;
 
 class ExceptionAnalyser
 {
-    private TypeAnalyserInterface $typeAnalyser;
-    private CarrierAnalyserInterface $carrierAnalyser;
-    private SpikeAnalyserInterface $spikeAnalyser;
 
-    /**
-     * ExceptionAnalyser class constructor.
-     *
-     * @param TypeAnalyserInterface $typeAnalyser An instance of ITypeAnalyser.
-     * @param CarrierAnalyserInterface $carrierAnalyser An instance of ICarrierAnalyser.
-     * @param SpikeAnalyserInterface $spikeAnalyser An instance of ISpikeAnalyser.
-     */
+
     public function __construct(
-        TypeAnalyserInterface    $typeAnalyser,
-        CarrierAnalyserInterface $carrierAnalyser,
-        SpikeAnalyserInterface   $spikeAnalyser)
+        protected TypeAnalyserInterface    $typeAnalyser,
+        protected CarrierAnalyserInterface $carrierAnalyser,
+        protected SpikeAnalyserInterface   $spikeAnalyser)
     {
-        $this->typeAnalyser = $typeAnalyser;
-        $this->carrierAnalyser = $carrierAnalyser;
-        $this->spikeAnalyser = $spikeAnalyser;
+
     }
 
     /**
-     * Detects if there is a spike in the given exception logs for the specified application.
-     *
-     * @param Collection $exceptionLogs A collection of exception logs.
-     * @param string $application The name of the application.
      * @return bool Returns true if a spike is detected, false otherwise.
      */
     public function detectSpike($exceptionLogs, $application): bool
     {
-        return $this->spikeAnalyser->detectSpike($exceptionLogs , $application);
+        return $this->spikeAnalyser->detectSpike($exceptionLogs, $application);
     }
 
     /**
      * Finds the cause of the exceptions in the given exception logs.
-     *
-     * @param Collection $exceptionLogs A collection of exception logs.
      */
-    public function findCause($exceptionLogs)
+    public function identifyCause($exceptionLogs) : Cause
     {
+        $cause = new Cause;
         $types = $this->typeAnalyser->analyse($exceptionLogs);
-        // If the types array contains CarrierException, do stuff
-        foreach ($types as $type => $count) {
-            if (str_contains($type, 'CarrierException')) {
-                $carrier = $this->carrierAnalyser::analyse($exceptionLogs
-                    ->groupBy('type')
-                    ->get($type));
-                break;
-            }
+
+        $data['types'] = $types->keys()->toArray();
+
+        if ($types->containsRequestException()) {
+            CarrierHealthCheck::dispatch()->onQueue('health-check'); //to determine if carriers are alive
         }
+
+        if ($types->containsCarrierException()) {
+            $carrierLogs = $types->filter(function ($value, $key) {
+                return str_contains($key, 'CarrierException');
+            })->flatten(1); //flatten to remove the key
+            $data['carrier'] = $this->carrierAnalyser->analyse($carrierLogs);
+        }
+        $cause->data = json_encode($data);
+
+        return $cause;
     }
 }
