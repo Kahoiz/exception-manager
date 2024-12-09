@@ -3,13 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Jobs\PersistException;
-use App\Jobs\SpikeDetection;
-use App\Models\ExceptionLog;
 use Illuminate\Console\Command;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Queue;
 use App\Jobs\AnalyseException;
-use Spatie\SlackAlerts\Facades\SlackAlert;
+
 
 class ProcessNewExceptions extends Command
 {
@@ -25,7 +22,6 @@ class ProcessNewExceptions extends Command
         $analyseLogs = []; //to be analysed
         try {
             while ($message = Queue::pop('new-exception')) {
-
                 $log = $message->payload();
                 $persistLogs[] = $this->transform($log, $time);
 
