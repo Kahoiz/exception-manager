@@ -2,7 +2,6 @@
 
 namespace App\Service\Analysis\Interfaces;
 
-use Illuminate\Database\Eloquent\Collection;
 
 interface SpikeAnalyserInterface
 {
@@ -13,5 +12,5 @@ interface SpikeAnalyserInterface
  * @param string $application The name of the application.
  * @return bool Returns true if a spike is detected, false otherwise.
  */
-public function detectSpike(Collection $exceptions, string $application) : bool;
+public function detectSpike($exceptions, string $application) : bool;
 }
