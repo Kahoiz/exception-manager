@@ -28,8 +28,5 @@ class CarrierAnalyser implements CarrierAnalyserInterface
         arsort($carrierCounts); //Sort by value, descending
 
         return array_key_first($carrierCounts);
-
     }
-
 }
-

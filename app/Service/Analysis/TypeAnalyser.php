@@ -9,7 +9,6 @@ class TypeAnalyser implements TypeAnalyserInterface
     public function analyse($exceptions)
     {
         return $exceptions->groupBy('type')->sortDesc()->take(5);
-
     }
 
 }
