@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Cause;
 use App\Service\ExceptionAnalyser;
+use App\Service\Notification\NotificationBuilder;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Collection;
@@ -25,17 +26,15 @@ class AnalyseException implements ShouldQueue
 
     public function handle(ExceptionAnalyser $analyser): void
     {
-        $spike = $analyser->detectSpike($this->exceptionLogs, $this->application);
-
-        $cause = $analyser->identifyCause($this->exceptionLogs);
-
-        $cause->application = $this->application;
-
-        $cause->save();
-
-        if (!$spike) {
+        if (!$analyser->detectSpike($this->exceptionLogs, $this->application)) {
             return;
         }
 
+        $cause = $analyser->identifyCause($this->exceptionLogs);
+        $cause->application = $this->application;
+
+        $cause->save();
+        $builder = new NotificationBuilder($cause);
+        $builder->notifySpikeWithBlocks($cause);
     }
 }

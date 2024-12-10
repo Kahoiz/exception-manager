@@ -35,6 +35,7 @@ class ExceptionAnalyser
     public function identifyCause($exceptionLogs) : Cause
     {
         $cause = new Cause;
+
         $types = $this->typeAnalyser->analyse($exceptionLogs);
 
         $data['types'] = $types->keys()->toArray();
@@ -44,11 +45,14 @@ class ExceptionAnalyser
         }
 
         if ($types->containsCarrierException()) {
+
             $carrierLogs = $types->filter(function ($value, $key) {
                 return str_contains($key, 'CarrierException');
             })->flatten(1); //flatten to remove the key
+
             $data['carrier'] = $this->carrierAnalyser->analyse($carrierLogs);
         }
+
         $cause->data = json_encode($data);
 
         return $cause;

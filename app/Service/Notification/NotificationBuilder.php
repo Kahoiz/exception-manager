@@ -6,10 +6,17 @@ use Spatie\SlackAlerts\Facades\SlackAlert;
 
 class NotificationBuilder
 {
-    public static function notifySpikeWithBlocks($data,$application): void
+    private $application;
+    private $cause;
+    public function __construct($cause)
     {
-        $firstThrown = $data[0]['thrown_at'];
-        $count = count($data);
+        $this->application = $cause->application;
+        $this->cause = $cause;
+    }
+
+
+    public function notifySpikeWithBlocks($cause): void
+    {
 
         SlackAlert::blocks([
             [
@@ -25,12 +32,8 @@ class NotificationBuilder
                 "fields" => [
                     [
                         "type" => "mrkdwn",
-                        "text" => "*Application:*\n{$application}"
+                        "text" => "*Application:*\n{$this->application}"
                     ],
-                    [
-                        "type" => "mrkdwn",
-                        "text" => "*First thrown:*\n{$firstThrown}"
-                    ]
 
                 ]
             ],
@@ -39,14 +42,28 @@ class NotificationBuilder
                 "fields" => [
                     [
                         "type" => "mrkdwn",
-                        "text" => "*Total exceptions:*\n{$count}"
+                        "text" => "*Total exceptions:*\n{}"
                     ],
                 ]
             ],
-
+                ...self::addExceptionTypes($cause->data['types']),
         ]);
     }
 
+    private static function addExceptionTypes(mixed $types): array
+    {
+        return array_map(function ($type) {
+            return [
+                "type" => "section",
+                "fields" => [
+                    [
+                        "type" => "mrkdwn",
+                        "text" => "*Type:*\n{$type}"
+                    ]
+                ]
+            ];
+        }, $types);
+    }
 
 
 }
