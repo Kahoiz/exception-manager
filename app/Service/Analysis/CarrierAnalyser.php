@@ -3,10 +3,11 @@
 namespace App\Service\Analysis;
 
 use App\Service\Analysis\Interfaces\CarrierAnalyserInterface;
+use Illuminate\Support\Collection;
 
 class CarrierAnalyser implements CarrierAnalyserInterface
 {
-    public function analyse($exceptions) : string
+    public function analyse(Collection $exceptions) : string
     {
 
         $carrierCounts = [];
@@ -27,6 +28,7 @@ class CarrierAnalyser implements CarrierAnalyserInterface
 
         arsort($carrierCounts); //Sort by value, descending
 
-        return array_key_first($carrierCounts);
+
+        return array_key_first($carrierCounts) ?? '';
     }
 }

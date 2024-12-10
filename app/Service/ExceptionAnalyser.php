@@ -40,6 +40,7 @@ class ExceptionAnalyser
 
         $data['types'] = $types->keys()->toArray();
 
+
         if ($types->containsRequestException()) {
             CarrierHealthCheck::dispatch()->onQueue('health-check'); //to determine if carriers are alive
         }

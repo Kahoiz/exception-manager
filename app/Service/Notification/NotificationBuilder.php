@@ -17,7 +17,6 @@ class NotificationBuilder
 
     public function notifySpikeWithBlocks($cause): void
     {
-
         SlackAlert::blocks([
             [
                 "type" => "header",
@@ -46,7 +45,7 @@ class NotificationBuilder
                     ],
                 ]
             ],
-                ...self::addExceptionTypes($cause->data['types']),
+                //...self::addExceptionTypes($cause->data['types']),
         ]);
     }
 
@@ -64,6 +63,4 @@ class NotificationBuilder
             ];
         }, $types);
     }
-
-
 }

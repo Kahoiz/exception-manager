@@ -18,9 +18,9 @@ class AnalyseException implements ShouldQueue
 
     public string $application;
 
-    public function __construct($exceptionLogs, $application)
+    public function __construct(Collection $exceptionLogs, string $application)
     {
-        $this->exceptionLogs = collect($exceptionLogs);
+        $this->exceptionLogs = $exceptionLogs;
         $this->application = $application;
     }
 
@@ -29,11 +29,11 @@ class AnalyseException implements ShouldQueue
         if (!$analyser->detectSpike($this->exceptionLogs, $this->application)) {
             return;
         }
-
         $cause = $analyser->identifyCause($this->exceptionLogs);
         $cause->application = $this->application;
 
         $cause->save();
+
         $builder = new NotificationBuilder($cause);
         $builder->notifySpikeWithBlocks($cause);
     }

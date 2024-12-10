@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Analysis;
 
 use App\Service\Analysis\SpikeAnalyser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
