@@ -2,16 +2,14 @@
 
 namespace Tests\Feature;
 
-use App\Console\Commands\ProcessNewExceptions;
-use App\Jobs\PersistException;
-use App\Jobs\AnalyseException;
 use App\Models\ExceptionLog;
-use Illuminate\Database\Eloquent\Casts\Json;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Queue;
-use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Foundation\Testing\WithConsoleEvents;
+use Mockery;
+use PHPUnit\Framework\Assert;
 use Tests\TestCase;
+use Tests\TestHelper;
+
 
 class ProcessNewExceptionsTest extends TestCase
 {
@@ -20,17 +18,85 @@ class ProcessNewExceptionsTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
-        // Fake the queue so we can simulate the state of the queue
-        Queue::fake();
-        Bus::fake();
+        // Fake the queue testing done in the test helper class
+        TestHelper::mockQueueFacades();
     }
 
-    protected function tearDown(): void
+    public function tearDown(): void
     {
         parent::tearDown();
     }
 
-    public function test_it_processes_new_exceptions()
+    public function test_it_processes_no_new_exceptions_gracefully()
+    {
+        // Act
+        $this->artisan('mq:process')->assertExitCode(0);
+    }
+
+    public function test_it_processes_new_exceptions_with_valid_data($data = [])
+    {
+        // Arrange
+        // Create valid test data if none is provided
+        if(empty($data)){
+            $data = $this->createValidTestData(10);
+        }
+        TestHelper::mockQueue($data);
+
+        // Act
+        $this->artisan('mq:process')->assertExitCode(0);
+
+        // Assert
+        $this->assertDataIsInsertedIntoDatabase($data);
+    }
+
+    public function test_it_handles_invalid_data_gracefully_without_processing()
+    {
+        // Arrange
+        $amountOfExceptionsInDB = ExceptionLog::count();
+        $data = $this->createInvalidData(10);
+        TestHelper::mockQueue($data);
+
+        // Act
+        $this->artisan('mq:process')->assertExitCode(0);
+
+        // Assert
+        //there should be no new exceptions in the database
+        assert::assertEquals($amountOfExceptionsInDB, ExceptionLog::count());
+    }
+
+    public function test_processes_exceptions_within_limit_gracefully()
+    {
+        // Arrange
+        $data = $this->createValidTestData(500);
+        TestHelper::mockQueue($data);
+
+        $this->artisan('mq:process', ['--limit' => 500])->assertExitCode(0);
+        $this->assertDataIsInsertedIntoDatabase($data);
+    }
+
+    public function test_processes_exceptions_with_limit_exceeding_max_gracefully()
+    {
+        // Arrange
+        $data = $this->createValidTestData(600);
+        TestHelper::mockQueue($data);
+
+        // Assert
+        $this->artisan('mq:process', ['--limit' => 600])->assertExitCode(0);
+        $this->assertDataIsInsertedIntoDatabase($data);
+    }
+
+    public function test_processes_exceptions_with_limit_below_zero_gracefully()
+    {
+        // Arrange
+        $data = $this->createValidTestData(10);
+        TestHelper::mockQueue($data);
+
+        // Assert
+        $this->artisan('mq:process', ['--limit' => -1])->assertExitCode(0);
+        $this->assertDataIsInsertedIntoDatabase($data);
+    }
+
+    private function createValidTestData($amount)
     {
         // create data collection
         $data = collect();
@@ -49,12 +115,38 @@ class ProcessNewExceptionsTest extends TestCase
             ]);
         }
 
-        $data->each(function($log) {
-            $message = Json::encode(['payload' => $log->toArray()]);
-            Queue::pushRaw('new-exception', $message);
-        });
+        return $data;
+    }
 
-        // ensure the data is in the queue
-        $this->assertEquals(10, Queue::size('new-exception'));
+    private function createInvalidData(int $amount){
+        // create data collection
+        $data = collect();
+        for($i = 0; $i < 10; $i++) {
+            $data[$i] = (object)[
+                "invalid data",
+                123,
+                false
+            ];
+        }
+
+        return $data;
+    }
+
+    private function assertDataIsInsertedIntoDatabase($data)
+    {
+        $data->each(function ($item) {
+            $this->assertDatabaseHas('exception_logs', [
+                'uuid' => $item->uuid,
+                'message' => $item->message,
+                'type' => $item->type,
+                'code' => $item->code,
+                'file' => $item->file,
+                'line' => $item->line,
+                'trace' => $item->trace,
+                'user_id' => $item->user_id,
+                'application' => $item->application,
+                'thrown_at' => $item->thrown_at,
+            ]);
+        });
     }
 }
