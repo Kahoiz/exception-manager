@@ -1,0 +1,31 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    reportUnmatchedIgnoredErrors: false
+    paths:
+        - %currentWorkingDirectory%/app/
+
+    # Level 10 is the highest level
+    level: 6
+
+    ignoreErrors:
+        - '#PHPDoc tag @var#'
+        - '#does not accept array<#'
+        - '#with no value type specified in iterable type array.#'
+        - '#type has no value type specified in iterable type array.#'
+        - '#should return Illuminate\Support\Collection<#'
+        - '#return type with generic class Illuminate\\Support\\Collection does not specify its types: TKey, TValue#'
+        - '#Unable to resolve the template type TKey in call to function collect#'
+        - '#Unable to resolve the template type TValue in call to function collect#'
+        - '#keys of method Illuminate\\Support\\Collection<.*>::select\(\) expects (array<.*>|Illuminate\\Support\\Enumerable<.*>|string|null), array\{.*\} given.#'
+        - '#Method .*::.*\(\) return type with generic class Illuminate\\Database\\Eloquent\\Collection does not specify its types: TKey, TModel#'
+        - '#TKey, TValue#'
+        - '#expects array<#'
+        - '#expects Collection<#'
+        - '#TRelatedModel, TChildModel#'
+        - '#TGet, TSet#'
+        - '#TRelatedModel#'
+        - '#TModelClass#'
+        - '#HasFactory but does not specify its types: TFactory#'
+
