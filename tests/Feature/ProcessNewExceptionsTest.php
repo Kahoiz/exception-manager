@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\ExceptionLog;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithConsoleEvents;
+use Illuminate\Support\Collection;
 use Mockery;
 use PHPUnit\Framework\Assert;
 use Tests\TestCase;
@@ -27,13 +28,13 @@ class ProcessNewExceptionsTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_it_processes_no_new_exceptions_gracefully()
+    public function test_it_processes_no_new_exceptions_gracefully(): void
     {
         // Act
         $this->artisan('mq:process')->assertExitCode(0);
     }
 
-    public function test_it_processes_new_exceptions_with_valid_data($data = [])
+    public function test_it_processes_new_exceptions_with_valid_data(array $data = []): void
     {
         // Arrange
         // Create valid test data if none is provided
@@ -49,7 +50,7 @@ class ProcessNewExceptionsTest extends TestCase
         $this->assertDataIsInsertedIntoDatabase($data);
     }
 
-    public function test_it_handles_invalid_data_gracefully_without_processing()
+    public function test_it_handles_invalid_data_gracefully_without_processing(): void
     {
         // Arrange
         $amountOfExceptionsInDB = ExceptionLog::count();
@@ -64,7 +65,7 @@ class ProcessNewExceptionsTest extends TestCase
         assert::assertEquals($amountOfExceptionsInDB, ExceptionLog::count());
     }
 
-    public function test_processes_exceptions_within_limit_gracefully()
+    public function test_processes_exceptions_within_limit_gracefully(): void
     {
         // Arrange
         $data = $this->createValidTestData(500);
@@ -74,7 +75,7 @@ class ProcessNewExceptionsTest extends TestCase
         $this->assertDataIsInsertedIntoDatabase($data);
     }
 
-    public function test_processes_exceptions_with_limit_exceeding_max_gracefully()
+    public function test_processes_exceptions_with_limit_exceeding_max_gracefully(): void
     {
         // Arrange
         $data = $this->createValidTestData(600);
@@ -85,7 +86,7 @@ class ProcessNewExceptionsTest extends TestCase
         $this->assertDataIsInsertedIntoDatabase($data);
     }
 
-    public function test_processes_exceptions_with_limit_below_zero_gracefully()
+    public function test_processes_exceptions_with_limit_below_zero_gracefully(): void
     {
         // Arrange
         $data = $this->createValidTestData(10);
@@ -96,7 +97,7 @@ class ProcessNewExceptionsTest extends TestCase
         $this->assertDataIsInsertedIntoDatabase($data);
     }
 
-    private function createValidTestData($amount)
+    private function createValidTestData($amount) : Collection
     {
         // create data collection
         $data = collect();
@@ -118,7 +119,8 @@ class ProcessNewExceptionsTest extends TestCase
         return $data;
     }
 
-    private function createInvalidData(int $amount){
+    private function createInvalidData(int $amount): Collection
+    {
         // create data collection
         $data = collect();
         for($i = 0; $i < 10; $i++) {
@@ -132,7 +134,7 @@ class ProcessNewExceptionsTest extends TestCase
         return $data;
     }
 
-    private function assertDataIsInsertedIntoDatabase($data)
+    private function assertDataIsInsertedIntoDatabase($data): void
     {
         $data->each(function ($item) {
             $this->assertDatabaseHas('exception_logs', [

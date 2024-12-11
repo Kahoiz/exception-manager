@@ -7,15 +7,18 @@ use PHPUnit\Framework\TestCase;
 
 class CarrierAnalyserTest extends TestCase
 {
-    public function test_analyse_returns_most_frequent_carrier()
+    public function test_analyse_returns_most_frequent_carrier(): void
     {
         // Arrange
         $carrierAnalyser = new CarrierAnalyser();
-        $exceptions = [
+        $data = [
             ['file' => '/var/www/Carriers/CarrierA/Modules/ModuleA.php'],
             ['file' => '/var/www/Carriers/CarrierA/Modules/ModuleB.php'],
             ['file' => '/var/www/Carriers/CarrierB/Modules/ModuleA.php']
         ];
+
+        $exceptions = collect($data);
+
 
         // Act
         $result = $carrierAnalyser->analyse($exceptions);
@@ -24,14 +27,15 @@ class CarrierAnalyserTest extends TestCase
         $this->assertEquals('CarrierA', $result);
     }
 
-    public function test_analyse_returns_empty_string_when_no_carrier_found()
+    public function test_analyse_returns_empty_string_when_no_carrier_found(): void
     {
         // Arrange
         $carrierAnalyser = new CarrierAnalyser();
-        $exceptions = [
+        $data = [
             ['file' => '/var/www/Modules/ModuleA.php'],
             ['file' => '/var/www/Modules/ModuleB.php']
         ];
+        $exceptions = collect($data);
 
         // Act
         $result = $carrierAnalyser->analyse($exceptions);
@@ -40,11 +44,11 @@ class CarrierAnalyserTest extends TestCase
         $this->assertEquals('', $result);
     }
 
-    public function test_analyse_handles_empty_exceptions_array()
+    public function test_analyse_handles_empty_exceptions_array(): void
     {
         // Arrange
         $carrierAnalyser = new CarrierAnalyser();
-        $exceptions = [];
+        $exceptions = collect();
 
         // Act
         $result = $carrierAnalyser->analyse($exceptions);
@@ -53,14 +57,16 @@ class CarrierAnalyserTest extends TestCase
         $this->assertEquals('', $result);
     }
 
-    public function test_analyse_handles_multiple_carriers_with_same_count()
+    public function test_analyse_handles_multiple_carriers_with_same_count(): void
     {
         // Arrange
         $carrierAnalyser = new CarrierAnalyser();
-        $exceptions = [
+        $data = [
             ['file' => '/var/www/Carriers/CarrierA/Modules/ModuleA.php'],
             ['file' => '/var/www/Carriers/CarrierB/Modules/ModuleA.php']
         ];
+        $exceptions = collect($data);
+
 
         // Act
         $result = $carrierAnalyser->analyse($exceptions);
@@ -69,14 +75,16 @@ class CarrierAnalyserTest extends TestCase
         $this->assertContains($result, ['CarrierA', 'CarrierB']);
     }
 
-    public function test_analyse_ignores_non_matching_paths()
+    public function test_analyse_ignores_non_matching_paths(): void
     {
         // Arrange
         $carrierAnalyser = new CarrierAnalyser();
-        $exceptions = [
+        $data = [
             ['file' => '/var/www/Carriers/CarrierA/Modules/ModuleA.php'],
             ['file' => '/var/www/Other/CarrierB/Modules/ModuleA.php']
         ];
+        $exceptions = collect($data);
+
 
         // Act
         $result = $carrierAnalyser->analyse($exceptions);
