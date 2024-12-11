@@ -24,7 +24,7 @@ class ExceptionAnalyser
     /**
      * @return bool Returns true if a spike is detected, false otherwise.
      */
-    public function detectSpike($exceptionLogs, $application): bool
+    public function detectSpike(Collection $exceptionLogs, string $application): bool
     {
         return $this->spikeAnalyser->detectSpike($exceptionLogs, $application);
     }
@@ -32,7 +32,7 @@ class ExceptionAnalyser
     /**
      * Finds the cause of the exceptions in the given exception logs.
      */
-    public function identifyCause($exceptionLogs) : Cause
+    public function identifyCause(Collection $exceptionLogs) : Cause
     {
         $cause = new Cause;
 
@@ -53,8 +53,7 @@ class ExceptionAnalyser
 
             $data['carrier'] = $this->carrierAnalyser->analyse($carrierLogs);
         }
-
-        $cause->data = json_encode($data);
+        $cause['data'] = $data;
 
         return $cause;
     }
