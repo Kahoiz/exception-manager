@@ -6,6 +6,8 @@ use App\Jobs\AnalyseException;
 use App\Models\Cause;
 use App\Service\ExceptionAnalyser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use JsonException;
+use PHPUnit\Framework\MockObject\Exception;
 use Tests\TestCase;
 
 class AnalyseExceptionTest extends TestCase
@@ -18,13 +20,18 @@ class AnalyseExceptionTest extends TestCase
     }
 
 
-    public function test_handle_detects_spike_and_saves_cause()
+    /**
+     * @throws Exception
+     * @throws JsonException
+     */
+    public function test_handle_detects_spike_and_saves_cause(): void
     {
         // Arrange
-        $exceptionLogs = [
+        $data = [
             ['file' => '/var/www/Carriers/CarrierA/Modules/ModuleA.php'],
             ['file' => '/var/www/Carriers/CarrierA/Modules/ModuleB.php']
         ];
+        $exceptionLogs = collect($data);
         $application = 'TestApp';
         $cause = $this->testCause();
         $analyser = $this->createMock(ExceptionAnalyser::class);
@@ -39,13 +46,17 @@ class AnalyseExceptionTest extends TestCase
         $this->assertDatabaseHas('causes', ['application' => $application]);
     }
 
-    public function test_handle_does_not_save_cause_when_no_spike_detected()
+    /**
+     * @throws Exception
+     */
+    public function test_handle_does_not_save_cause_when_no_spike_detected(): void
     {
         // Arrange
-        $exceptionLogs = [
+        $data = [
             ['file' => '/var/www/Carriers/CarrierA/Modules/ModuleA.php'],
             ['file' => '/var/www/Carriers/CarrierA/Modules/ModuleB.php']
         ];
+        $exceptionLogs = collect($data);
         $application = 'TestApp';
         $analyser = $this->createMock(ExceptionAnalyser::class);
         $analyser->method('detectSpike')->willReturn(false);
@@ -58,10 +69,13 @@ class AnalyseExceptionTest extends TestCase
         $this->assertDatabaseMissing('causes', ['application' => $application]);
     }
 
-    public function test_handle_handles_empty_exception_logs()
+    /**
+     * @throws Exception
+     */
+    public function test_handle_handles_empty_exception_logs(): void
     {
         // Arrange
-        $exceptionLogs = [];
+        $exceptionLogs = collect();
         $application = 'TestApp';
         $analyser = $this->createMock(ExceptionAnalyser::class);
         $analyser->method('detectSpike')->willReturn(false);
@@ -74,7 +88,10 @@ class AnalyseExceptionTest extends TestCase
         $this->assertDatabaseMissing('causes', ['application' => $application]);
     }
 
-    private function testCause()
+    /**
+     * @throws JsonException
+     */
+    private function testCause(): Cause
     {
         return new Cause([
             'application' => 'TestApp',
@@ -87,7 +104,7 @@ class AnalyseExceptionTest extends TestCase
                     'App\Exceptions\TestException'
                 ],
                 'carrier' => 'DHL'
-            ])
+            ], JSON_THROW_ON_ERROR)
         ]);
     }
 }

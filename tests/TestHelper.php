@@ -15,7 +15,7 @@ class TestHelper
      *
      * @return void
      */
-    public static function mockQueueFacades($ToFake = []) : void
+    public static function mockQueueFacades(array $ToFake = []) : void
     {
         Queue::fake($ToFake);
 
@@ -55,7 +55,7 @@ class TestHelper
                     }
 
                     //delete the message from the queue (mocked)
-                    public function delete()
+                    public function delete(): true
                     {
                         return true;
                     }

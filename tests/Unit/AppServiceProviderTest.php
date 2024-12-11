@@ -15,7 +15,7 @@ use App\Providers\AppServiceProvider;
 
 class AppServiceProviderTest extends TestCase
 {
-    public function test_registers_exception_analyser_as_singleton()
+    public function test_registers_exception_analyser_as_singleton(): void
     {
         // Arrange
         $this->app->register(AppServiceProvider::class);
@@ -28,7 +28,7 @@ class AppServiceProviderTest extends TestCase
         $this->assertSame($exceptionAnalyser1, $exceptionAnalyser2);
     }
 
-    public function test_binds_type_analyser_interface_to_type_analyser()
+    public function test_binds_type_analyser_interface_to_type_analyser(): void
     {
         // Arrange
         $this->app->register(AppServiceProvider::class);
@@ -39,7 +39,7 @@ class AppServiceProviderTest extends TestCase
         $this->assertInstanceOf(TypeAnalyser::class, $typeAnalyser);
     }
 
-    public function test_binds_carrier_analyser_interface_to_carrier_analyser()
+    public function test_binds_carrier_analyser_interface_to_carrier_analyser(): void
     {
         // Arrange
         $this->app->register(AppServiceProvider::class);
@@ -51,7 +51,7 @@ class AppServiceProviderTest extends TestCase
         $this->assertInstanceOf(CarrierAnalyser::class, $carrierAnalyser);
     }
 
-    public function test_binds_spike_analyser_interface_to_spike_analyser()
+    public function test_binds_spike_analyser_interface_to_spike_analyser(): void
     {
         // Arrange
         $this->app->register(AppServiceProvider::class);
@@ -63,7 +63,7 @@ class AppServiceProviderTest extends TestCase
         $this->assertInstanceOf(SpikeAnalyser::class, $spikeAnalyser);
     }
 
-    public function test_collection_macro_contains_carrier_exception()
+    public function test_collection_macro_contains_carrier_exception(): void
     {
         // Arrange
         $this->app->register(AppServiceProvider::class);
@@ -75,7 +75,7 @@ class AppServiceProviderTest extends TestCase
         $this->assertTrue($collection->containsCarrierException());
     }
 
-    public function test_collection_macro_does_not_contain_carrier_exception()
+    public function test_collection_macro_does_not_contain_carrier_exception(): void
     {
         // Arrange
         $this->app->register(AppServiceProvider::class);
@@ -87,7 +87,7 @@ class AppServiceProviderTest extends TestCase
         $this->assertFalse($collection->containsCarrierException());
     }
 
-    public function test_collection_macro_contains_request_exception()
+    public function test_collection_macro_contains_request_exception(): void
     {
         // Arrange
         $this->app->register(AppServiceProvider::class);
@@ -99,7 +99,7 @@ class AppServiceProviderTest extends TestCase
         $this->assertTrue($collection->containsRequestException());
     }
 
-    public function test_collection_macro_does_not_contain_request_exception()
+    public function test_collection_macro_does_not_contain_request_exception(): void
     {
         // Arrange
         $this->app->register(AppServiceProvider::class);

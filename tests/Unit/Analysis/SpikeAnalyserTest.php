@@ -4,12 +4,13 @@ namespace Analysis;
 
 use App\Service\Analysis\SpikeAnalyser;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Collection;
 use Tests\TestCase;
 
 class SpikeAnalyserTest extends TestCase
 {
     use RefreshDatabase;
-    private $spikeAnalyser;
+    private SpikeAnalyser $spikeAnalyser;
 
     protected function setUp(): void
     {
@@ -19,7 +20,7 @@ class SpikeAnalyserTest extends TestCase
         $this->spikeAnalyser = new SpikeAnalyser();
     }
 
-    public static function spikeDetectionDataProvider()
+    public static function spikeDetectionDataProvider(): array
     {
         return [
             // the last element in the collection, will be asserted
@@ -32,7 +33,7 @@ class SpikeAnalyserTest extends TestCase
     /**
      * @dataProvider spikeDetectionDataProvider
      */
-    public function test_spike_detection_should_return_expected_value($exceptionCount, $expectedResult)
+    public function test_spike_detection_should_return_expected_value(Collection $exceptionCount, bool $expectedResult): void
     {
         $amountOfTimesToRun = $exceptionCount->count();
         $result = false;
@@ -50,7 +51,7 @@ class SpikeAnalyserTest extends TestCase
         $this->assertEquals($expectedResult, $result);
     }
 
-    public function test_spike_detection_with_wrong_datatype_should_throw_error()
+    public function test_spike_detection_with_wrong_datatype_should_throw_error(): void
     {
         // invalid data type
         $exceptions = 'Invalid data type';
@@ -61,7 +62,7 @@ class SpikeAnalyserTest extends TestCase
         $this->spikeAnalyser->detectSpike($exceptions, 'TestApplication');
     }
 
-    private function createTestData($amount)
+    private function createTestData(int $amount) : Collection
     {
         $data = collect();
         for($i = 0; $i < $amount; $i++)
