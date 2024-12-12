@@ -29,7 +29,18 @@ class ProcessNewExceptions extends Command
         try {
             while ($message = Queue::pop('new-exception')) {
                 $log = $message->payload();
-                $persistLogs->push($this->transform($log, $time));
+                $transformValue = $this->transform($log, $time);
+
+                // if the log is empty, the transform method failed.
+                // Move message to invalid-messages queue for later analysis.
+                // Continue to the next message.
+                if(empty($transformValue)){
+                    $this->info('The log is empty');
+                    Queue::push($message, 'Invalid-messages');
+                    continue;
+                }
+
+                $persistLogs->push($transformValue);
 
                 unset($log['previous']); //not needed for analysis
 
@@ -56,11 +67,16 @@ class ProcessNewExceptions extends Command
     {
         $logList = [];
 
-        while ($log) {
-            $log['created_at'] = $time;
-            $log['updated_at'] = $time;
-            $logList[] = array_diff_key($log, ['previous' => '']); //avoid data clutter
-            $log = $log['previous'] ?? null;
+        try{
+            while ($log) {
+                $log['created_at'] = $time;
+                $log['updated_at'] = $time;
+                $logList[] = array_diff_key($log, ['previous' => '']); //avoid data clutter
+                $log = $log['previous'] ?? null;
+            }
+        }catch (\Exception $e){
+            $this->error('An error occurred while transforming the log');
+            return [];
         }
         return $logList;
     }
