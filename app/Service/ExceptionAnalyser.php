@@ -46,14 +46,14 @@ class ExceptionAnalyser
         }
 
         if ($types->containsCarrierException()) {
-
             $carrierLogs = $types->filter(function ($value, $key) {
                 return str_contains($key, 'CarrierException');
             })->flatten(1); //flatten to remove the key
 
             $data['carrier'] = $this->carrierAnalyser->analyse($carrierLogs);
         }
-        $cause['data'] = $data;
+
+        $cause->data = $data;
 
         return $cause;
     }

@@ -46,7 +46,7 @@ class SlackNotificationBuilder implements NotificationBuilderInterface
         $this->addHeader($notificationData->title);
 
         // Add the application and message sections
-        $this->notification->push([   // Use push to add each section
+        $this->notification->add([   // Use push to add each section
             "type" => "section",
             "fields" => [
                 [
@@ -62,7 +62,7 @@ class SlackNotificationBuilder implements NotificationBuilderInterface
 
         // Add the context section if provided
         if ($notificationData->context) {
-            $this->notification->push([
+            $this->notification->add([
                 "type" => "section",
                 "fields" => [
                     [
@@ -74,19 +74,30 @@ class SlackNotificationBuilder implements NotificationBuilderInterface
         }
 
         // Add the fields section (key-value pairs)
-        $this->notification->push([
+        $this->notification->add([
             "type" => "section",
-            "fields" => collect($notificationData->fields)->map(function ($value, $key) {
+            "fields" => collect($notificationData->fields)->map(function ($value, $key) use ($notificationData) {
                 // If the value is an array, join the array values with newlines
                 if (is_array($value)) {
+                    $value = $value->mapWithKeys(function ($v, $k) use ($notificationData) {
+                        if(str_contains('CarrierException', $k)){
+                            $v = "CarrierException: $notificationData->carrier";
+                        }
+                        return ["CarrierException" => $v];
+                    })->toArray();
+
                     $value = implode("\n", $value);
                 }
 
+                if(str_contains('CarrierException', $value)){
+                    $value = "CarrierException: $notificationData->carrier";
+                }
                 return [
                     "type" => "mrkdwn",
                     "text" => "*$key:*\n$value",  // Slack Markdown format
                 ];
             })->toArray(),
         ]);
+
     }
 }

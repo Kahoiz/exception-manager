@@ -54,13 +54,14 @@ class AnalyseException implements ShouldQueue
         ];
 
         //we encode the data to store it in the database
-        $cause->data = json_encode($data);
+        $cause->data = json_encode($cause->data);
         $cause->save();
 
         $notificationData = new NotificationData(
             "Spike detected",
             $this->application,
             "A sudden increase in exceptions was detected.",
+            carrier: $cause->data['carrier'] ?? null,
             fields:$data
         );
 
