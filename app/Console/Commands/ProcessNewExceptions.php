@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\PersistException;
+use App\TestTrait;
 use DateTime;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
@@ -13,6 +14,7 @@ use phpseclib3\Math\Common\FiniteField\Integer;
 
 class ProcessNewExceptions extends Command
 {
+
     protected $signature = 'mq:process {--limit=500}';
     protected $description = 'Empties a queue and spins up jobs in batches. Limitmax is 500';
     private CONST LIMIT = 500;
@@ -68,12 +70,12 @@ class ProcessNewExceptions extends Command
     private function dispatchJobs(Collection $persistLogs,Collection $analyseLogs): void
     {
         $this->info('Dispatching job to insert ' . count($persistLogs) . ' exceptions and subsidiaries into the database');
-        PersistException::dispatch($persistLogs)->onQueue('persist-exception');
+        PersistException::dispatchSync($persistLogs);
 
         $analyseLogs = collect($analyseLogs)->groupBy('application');
         foreach($analyseLogs as $application => $logs){
             $this->info('Dispatching job to analyse ' . count($analyseLogs) . ' from ' . $application);
-            AnalyseException::dispatch($logs,$application)->onQueue('analyse-exception');
+            AnalyseException::dispatchSync($logs,$application);
         }
 
     }

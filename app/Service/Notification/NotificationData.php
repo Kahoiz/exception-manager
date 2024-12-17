@@ -12,16 +12,11 @@ class NotificationData
     public ?string $carrier;
     public array $fields;    // Key-value pairs for additional data
 
-    public function __construct(string $title,
-                                string $application,
-                                string $message,
-                                ?string $context = null,
-                                ?string $carrier = null,
-                                array $fields = [])
+    public function __construct(
+        string  $application,
+        ?string $carrier = null,
+        array   $fields = [])
     {
-        $this->title = $title;
-        $this->message = $message;
-        $this->context = $context;
         $this->fields = $fields;
         $this->application = $application;
         $this->carrier = $carrier;

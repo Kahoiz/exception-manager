@@ -38,7 +38,9 @@ class ExceptionAnalyser
 
         $types = $this->typeAnalyser->analyse($exceptionLogs);
 
-        $data['types'] = $types->keys()->toArray();
+        $data['types'] = $types->mapWithKeys(function ($item, $key) {
+            return [$key => $item->count()];
+        })->toArray();
 
 
         if ($types->containsRequestException()) {

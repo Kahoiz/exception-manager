@@ -78,20 +78,6 @@ class SlackNotificationBuilder implements NotificationBuilderInterface
             "type" => "section",
             "fields" => collect($notificationData->fields)->map(function ($value, $key) use ($notificationData) {
                 // If the value is an array, join the array values with newlines
-                if (is_array($value)) {
-                    $value = $value->mapWithKeys(function ($v, $k) use ($notificationData) {
-                        if(str_contains('CarrierException', $k)){
-                            $v = "CarrierException: $notificationData->carrier";
-                        }
-                        return ["CarrierException" => $v];
-                    })->toArray();
-
-                    $value = implode("\n", $value);
-                }
-
-                if(str_contains('CarrierException', $value)){
-                    $value = "CarrierException: $notificationData->carrier";
-                }
                 return [
                     "type" => "mrkdwn",
                     "text" => "*$key:*\n$value",  // Slack Markdown format
