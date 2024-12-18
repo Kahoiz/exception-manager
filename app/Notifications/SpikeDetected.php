@@ -2,7 +2,6 @@
 
 namespace App\Notifications;
 
-use App\Models\Cause;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Slack\BlockKit\Blocks\ContextBlock;
@@ -52,7 +51,7 @@ class SpikeDetected extends Notification implements ShouldQueue
                 $section->text("*Top Errors:*")->markdown();
                 $errors = '';
                 foreach ($this->data['Top Errors'] as $key => $error) {
-                    if (str_contains($error, 'RequestException')) {
+                    if (str_contains($key, 'RequestException')) {
                         $requestException = true;
                     }
                     $errors .= "$key: $error\n";
