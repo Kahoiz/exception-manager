@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\Cause;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Slack\BlockKit\Blocks\ContextBlock;
@@ -13,11 +14,9 @@ class SpikeDetected extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    private array $data;
 
-    public function __construct(array $data)
+    public function __construct()
     {
-        $this->data = $data;
     }
 
     /**
@@ -25,8 +24,9 @@ class SpikeDetected extends Notification implements ShouldQueue
      *
      * @return array<int, string>
      */
-    public function via(object $notifiable): array
+    public function via(): array
     {
+
         return ['slack'];
     }
 
@@ -40,17 +40,17 @@ class SpikeDetected extends Notification implements ShouldQueue
         $requestException = false;
         $message = (new SlackMessage)
             ->headerBlock(':rotating_light: Spike detected :rotating_light:')
-            ->sectionBlock(function (SectionBlock $section) {
-                $section->text('Application: ' . $this->data['Application']);
+            ->sectionBlock(function (SectionBlock $section) use ($notifiable) {
+                $section->text('Application: ' . $notifiable->application);
             })
             ->dividerBlock()
-            ->contextBlock(function (ContextBlock $context) {
-                $context->text('Total Exception Count: ' . $this->data['Total Exception Count']);
+            ->contextBlock(function (ContextBlock $context) use ($notifiable) {
+                $context->text('Total Exception Count: ' . $notifiable->amount);
             })
-            ->sectionBlock(function (SectionBlock $section) use (&$requestException) {
+            ->sectionBlock(function (SectionBlock $section) use ($notifiable, &$requestException) {
                 $section->text("*Top Errors:*")->markdown();
                 $errors = '';
-                foreach ($this->data['Top Errors'] as $key => $error) {
+                foreach ($notifiable->data['types'] as $key => $error) {
                     if (str_contains($key, 'RequestException')) {
                         $requestException = true;
                     }
@@ -59,9 +59,9 @@ class SpikeDetected extends Notification implements ShouldQueue
                 $section->field($errors);
             });
 
-        if (isset($this->data['Carrier'])) {
-            $message->contextBlock(function (ContextBlock $context) {
-                $context->text('Carrier: ' . $this->data['Carrier']);
+        if (isset($notifiable->data['carrier'])) {
+            $message->contextBlock(function (ContextBlock $context) use ($notifiable) {
+                $context->text('Carrier: ' . $notifiable->data['carrier']);
             });
         }
         if ($requestException) {

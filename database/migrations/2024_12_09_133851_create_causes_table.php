@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('causes', function (Blueprint $table) {
             $table->id();
             $table->string('application');
+            $table->integer('amount');
             $table->json('data');
             $table->timestamps();
         });

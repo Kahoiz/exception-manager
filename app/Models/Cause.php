@@ -10,6 +10,7 @@ class Cause extends Model
     use Notifiable;
     protected $fillable = [
         'application',
+        'amount',
         'data',
         ];
 }

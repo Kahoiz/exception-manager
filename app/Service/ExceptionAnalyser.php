@@ -36,6 +36,7 @@ class ExceptionAnalyser
     {
         $cause = new Cause;
 
+        $cause->amount = $exceptionLogs->count();
         $types = $this->typeAnalyser->analyse($exceptionLogs);
 
         $data['types'] = $types->mapWithKeys(function ($item, $key) {

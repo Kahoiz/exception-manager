@@ -56,14 +56,13 @@ class AnalyseException implements ShouldQueue
             $data['Carrier'] = $cause['data']['carrier'];
         }
 
-
+        $cause->notifyNow(new SpikeDetected());
 
         $cause->data = json_encode($cause->data);
 
 
         $cause->save();
 
-        Notification::sendNow($cause, new SpikeDetected($data));
 
     }
 }
