@@ -8,7 +8,6 @@ class NotificationData
     public string $message;
     public string $application; // Application name;
     public ?string $context; // Optional contextual information
-
     public ?string $carrier;
     public array $fields;    // Key-value pairs for additional data
 

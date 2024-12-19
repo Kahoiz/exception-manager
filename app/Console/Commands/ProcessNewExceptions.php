@@ -3,13 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Jobs\PersistException;
+use App\Service\ExceptionAnalyser;
 use App\TestTrait;
-use DateTime;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Queue;
 use App\Jobs\AnalyseException;
-use phpseclib3\Math\Common\FiniteField\Integer;
 
 
 class ProcessNewExceptions extends Command
@@ -75,7 +74,7 @@ class ProcessNewExceptions extends Command
         $analyseLogs = collect($analyseLogs)->groupBy('application');
         foreach($analyseLogs as $application => $logs){
             $this->info('Dispatching job to analyse ' . count($analyseLogs) . ' from ' . $application);
-            AnalyseException::dispatchSync($logs,$application);
+            AnalyseException::dispatchSync($logs,$application, ExceptionAnalyser::class);
         }
 
     }

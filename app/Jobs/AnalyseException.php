@@ -4,11 +4,10 @@ namespace App\Jobs;
 
 use App\Notifications\SpikeDetected;
 use App\Service\ExceptionAnalyser;
-use App\Service\Notification\AbstractNotificationBuilder;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Notification;
+
 
 
 class AnalyseException implements ShouldQueue
@@ -19,50 +18,65 @@ class AnalyseException implements ShouldQueue
 
     public string $application;
 
-    // @var Collection<AbstractNotificationBuilder>
+    private ExceptionAnalyser $analyser;
 
     /**
      * Constructor for AnalyseException.
      *
      * @param Collection $exceptionLogs Collection of exception logs.
      * @param string $application Name of the application.
-     * TODO make obligatory $NotificationBuilders .
      */
-    public function __construct(Collection $exceptionLogs, string $application)
+    public function __construct(Collection $exceptionLogs,
+                                string $application
+                                )
     {
         $this->exceptionLogs = $exceptionLogs;
         $this->application = $application;
+        $this->analyser = resolve(ExceptionAnalyser::class);
     }
 
 
-    public function handle(ExceptionAnalyser $analyser): void
+    public function handle(): void
     {
-        //No spike, no reason to notify
-//        if (!$analyser->detectSpike($this->exceptionLogs, $this->application)) {
-//            return;
-//        }
+        // Detect anomalies in the exception logs
+        $causes = $this->detectAnomalies($this->exceptionLogs); //string array of causes
 
-        $cause = $analyser->identifyCause($this->exceptionLogs);
-        $cause->application = $this->application;
-
-        //get the data we need from cause
-        $data = [
-            "Application" => $this->application,
-            "Total Exception Count" => $this->exceptionLogs->count(),
-            'Top Errors' => $cause['data']['types']
-        ];
-
-        if(isset($cause['data']['carrier'])) {
-            $data['Carrier'] = $cause['data']['carrier'];
+        if(empty($causes)) {
+            return;
         }
 
+        // Identify the cause of the exceptions
+        $cause = $this->analyser->identifyCause($this->exceptionLogs);
+        $cause->application = $this->application;
+
+        // Retrieve the data property, modify it, and set it back
+        $data = $cause->data;
+        $data['causes'] = $causes;
+        $cause->data = $data;
+
+        // Notify the cause of the exceptions
         $cause->notifyNow(new SpikeDetected());
 
         $cause->data = json_encode($cause->data);
 
-
         $cause->save();
+    }
 
+    private function detectAnomalies(Collection $exceptionLogs) : array
+    {
+        $anomalies = [];
+        $value = $this->analyser->detectSpike($exceptionLogs, $this->application);
+        if($value) {
+            $anomalies['spikeDetected'] = "true";
+        }
 
+        $value = $this->analyser->detectTypeAnomaly($exceptionLogs);
+        foreach ($value as $type => $frequency) {
+            if($frequency > 0) {
+                $anomalies[$type ."Anomaly"] = $frequency;
+            }
+        }
+
+        return $anomalies;
     }
 }

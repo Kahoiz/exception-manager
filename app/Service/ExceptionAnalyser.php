@@ -29,6 +29,11 @@ class ExceptionAnalyser
         return $this->spikeAnalyser->detectSpike($exceptionLogs, $application);
     }
 
+    public function detectTypeAnomaly(Collection $exceptionLogs): array
+    {
+        return $this->typeAnalyser->anomalyDetection($exceptionLogs);
+    }
+
     /**
      * Finds the cause of the exceptions in the given exception logs.
      */

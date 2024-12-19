@@ -36,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(TypeAnalyserInterface::class, TypeAnalyser::class);
         $this->app->bind(CarrierAnalyserInterface::class, CarrierAnalyser::class);
         $this->app->bind(SpikeAnalyserInterface::class, SpikeAnalyser::class);
+        $this->app->bind(ExceptionAnalyser::class, ExceptionAnalyser::class);
     }
 
     /**

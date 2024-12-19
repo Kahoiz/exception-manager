@@ -34,13 +34,11 @@ class ProcessNewExceptionsTest extends TestCase
         $this->artisan('mq:process')->assertExitCode(0);
     }
 
-    public function test_it_processes_new_exceptions_with_valid_data(array $data = []): void
+    public function test_it_processes_new_exceptions_with_valid_data(): void
     {
         // Arrange
-        // Create valid test data if none is provided
-        if(empty($data)){
-            $data = $this->createValidTestData(10);
-        }
+        $data = $this->createValidTestData(10);
+
         TestHelper::mockQueue($data);
 
         // Act
@@ -97,11 +95,11 @@ class ProcessNewExceptionsTest extends TestCase
         $this->assertDataIsInsertedIntoDatabase($data);
     }
 
-    private function createValidTestData($amount) : Collection
+    private function createValidTestData($amount): Collection
     {
         // create data collection
         $data = collect();
-        for($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $data[$i] = ExceptionLog::create([
                 'type' => 'error',
                 'code' => 500,
@@ -123,7 +121,7 @@ class ProcessNewExceptionsTest extends TestCase
     {
         // create data collection
         $data = collect();
-        for($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 10; $i++) {
             $data[$i] = (object)[
                 "invalid data",
                 123,
