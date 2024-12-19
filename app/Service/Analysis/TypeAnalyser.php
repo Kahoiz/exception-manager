@@ -23,13 +23,10 @@ class TypeAnalyser implements TypeAnalyserInterface
     }
 
     /**
-     * Detects anomalies in the frequency of exception types.
-     *
-     * This method analyzes the given collection of exceptions to determine if there is a sudden increase
-     * in the frequency of any exception type compared to historical data.
+     * Detects anomalies in the given collection of exceptions.
      *
      * @param Collection $exceptions The collection of exceptions to analyze.
-     * @return Collection The collection of exception types with their frequencies.
+     * @return array An array of detected anomalies with their types and frequencies.
      */
     public function anomalyDetection(Collection $exceptions): array
     {
@@ -66,7 +63,7 @@ class TypeAnalyser implements TypeAnalyserInterface
                 continue;
             }
             $frequency = number_format(($frequency / $historicalDataCount) * 100, 2);
-            $result[$type] = $frequency > $types[$type]+$this->buffer ? $frequency : 0;
+            $result[$type] = $frequency > (int) $types[$type]+$this->buffer ? $frequency : 0;
         }
         return  $result;
     }

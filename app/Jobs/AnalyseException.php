@@ -51,7 +51,7 @@ class AnalyseException implements ShouldQueue
 
         // Retrieve the data property, modify it, and set it back
         $data = $cause->data;
-        $data['causes'] = $causes;
+        $data["causes"] = $causes;
         $cause->data = $data;
 
         // Notify the cause of the exceptions

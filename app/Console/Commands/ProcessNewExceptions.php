@@ -74,7 +74,7 @@ class ProcessNewExceptions extends Command
         $analyseLogs = collect($analyseLogs)->groupBy('application');
         foreach($analyseLogs as $application => $logs){
             $this->info('Dispatching job to analyse ' . count($analyseLogs) . ' from ' . $application);
-            AnalyseException::dispatchSync($logs,$application, ExceptionAnalyser::class);
+            AnalyseException::dispatchSync($logs,$application);
         }
 
     }
