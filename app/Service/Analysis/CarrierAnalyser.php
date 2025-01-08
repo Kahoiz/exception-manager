@@ -14,7 +14,7 @@ class CarrierAnalyser implements CarrierAnalyserInterface
 
         foreach ($exceptions as $exception) {
             $thrownPath = $exception['file'];
-            //Carrier is, sadly, only in the path of the exception
+            //Carrier is, sadly, only in the path of the exception so regex it is
             if (preg_match('/Carriers\/([^\/]+)\/Modules/', $thrownPath, $matches)) {
 
                 $carrier = $matches[1];

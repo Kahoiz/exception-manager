@@ -2,7 +2,6 @@
 
 namespace App\Notifications;
 
-use App\Models\Cause;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Slack\BlockKit\Blocks\ContextBlock;
@@ -37,7 +36,7 @@ class SpikeDetected extends Notification implements ShouldQueue
     public function toSlack(object $notifiable): SlackMessage
     {
         $requestException = false;
-        // create header message
+
         $headerMessage = $this->createHeaderMessage($notifiable);
 
         $message = (new SlackMessage)
@@ -63,7 +62,7 @@ class SpikeDetected extends Notification implements ShouldQueue
         $containsString = false;
         $searchString = 'RequestException';
 
-        foreach (array_keys($notifiable->data) as $key) {
+        foreach (array_keys($notifiable->data['types']) as $key) {
             if (str_contains($key, $searchString)) {
                 $containsString = true;
                 break;
@@ -107,7 +106,7 @@ class SpikeDetected extends Notification implements ShouldQueue
     private function addCauseSection(SlackMessage $message, array $data): void
     {
         $message->sectionBlock(function (SectionBlock $section) use ($data) {
-            $section->text("*Causes:*")->markdown();
+            $section->text("*Anomalies:*")->markdown();
             $causes = '';
             // flatten the array so we can loop through it
             foreach ($data['causes'] as $key => $item) {

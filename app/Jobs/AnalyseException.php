@@ -26,9 +26,7 @@ class AnalyseException implements ShouldQueue
      * @param Collection $exceptionLogs Collection of exception logs.
      * @param string $application Name of the application.
      */
-    public function __construct(Collection $exceptionLogs,
-                                string $application
-                                )
+    public function __construct(Collection $exceptionLogs, string $application)
     {
         $this->exceptionLogs = $exceptionLogs;
         $this->application = $application;
@@ -39,19 +37,18 @@ class AnalyseException implements ShouldQueue
     public function handle(): void
     {
         // Detect anomalies in the exception logs
-        $causes = $this->detectAnomalies($this->exceptionLogs); //string array of causes
+        $anomalies = $this->detectAnomalies($this->exceptionLogs); //string array of causes
 
-        if(empty($causes)) {
+        if(empty($anomalies)) {
             return;
         }
 
-        // Identify the cause of the exceptions
         $cause = $this->analyser->identifyCause($this->exceptionLogs);
         $cause->application = $this->application;
 
         // Retrieve the data property, modify it, and set it back
         $data = $cause->data;
-        $data["causes"] = $causes;
+        $data["anomalies"] = $anomalies;
         $cause->data = $data;
 
         // Notify the cause of the exceptions
@@ -65,9 +62,9 @@ class AnalyseException implements ShouldQueue
     private function detectAnomalies(Collection $exceptionLogs) : array
     {
         $anomalies = [];
-        $value = $this->analyser->detectSpike($exceptionLogs, $this->application);
-        if($value) {
-            $anomalies['spikeDetected'] = "true";
+        $spikeDetected = $this->analyser->detectSpike($exceptionLogs, $this->application);
+        if($spikeDetected) {
+            $anomalies['Spike'] = "true";
         }
 
         $value = $this->analyser->detectTypeAnomaly($exceptionLogs);

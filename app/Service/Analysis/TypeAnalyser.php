@@ -39,6 +39,7 @@ class TypeAnalyser implements TypeAnalyserInterface
         // Check if there is a sudden increase in the frequency of a type.
 
         $startDate = now()->subDays(1);
+
         $endDate = now();
 
         // Cache the historical data to avoid querying the whole table every time
@@ -49,7 +50,7 @@ class TypeAnalyser implements TypeAnalyserInterface
                 ->whereIn('type', $types->keys())
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->groupBy('type')
-                ->pluck('frequency', 'type'); // Plucking directly, no need for get()
+                ->pluck('frequency', 'type');
         });
 
         // compare the historical data with the current data

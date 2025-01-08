@@ -3,8 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\PersistException;
-use App\Service\ExceptionAnalyser;
-use App\TestTrait;
+
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Queue;
@@ -22,24 +21,21 @@ class ProcessNewExceptions extends Command
     public function handle(): void
     {
         $time = now()->format('Y-m-d H:i:s');
-
         $limit = $this->validateLimitOption($this->option('limit'));
 
-        $persistLogs = collect(); //to be inserted into the database
+        $persistLogs = collect();
+        $analyseLogs = collect();
+        $messagesToSave = collect();
 
-        $analyseLogs = collect(); //to be analysed
-
-        $messagesToSave = collect(); //to be deleted from the queue
         try {
             while ($message = Queue::pop('new-exception')) {
+                $messagesToSave->push($message);
                 $log = $message->payload();
                 $persistLogs->push($this->transform($log, $time));
 
                 unset($log['previous']); //not needed for analysis
 
                 $analyseLogs->push($log);
-
-                $messagesToSave->push($message);
 
                 if (count($persistLogs) >= $limit) {//prevent the command from potentially running out of memory
                     $this->dispatchJobs($persistLogs,$analyseLogs);
@@ -50,13 +46,15 @@ class ProcessNewExceptions extends Command
         }
         finally { //In case of errors or if the queue has been emptied
             if ($persistLogs->isNotEmpty()) {
-                $this->info("Queue is empty. Processing the remaining " . count($persistLogs) . " exceptions ");
                 $this->dispatchJobs($persistLogs,$analyseLogs);
                 $this->deleteMessagesFromQueue($messagesToSave);
             }
         }
     }
 
+    /**
+     * Transform the logs to the format required for persistance.
+     */
     private function transform(array $log, string $time): array
     {
         $logList = [];
@@ -69,20 +67,26 @@ class ProcessNewExceptions extends Command
         }
         return $logList;
     }
-
+    /**
+     * Dispatches the jobs to persist and analyse exceptions.
+     */
     private function dispatchJobs(Collection $persistLogs,Collection $analyseLogs): void
     {
         $this->info('Dispatching job to insert ' . count($persistLogs) . ' exceptions and subsidiaries into the database');
         PersistException::dispatchSync($persistLogs);
 
+        //Analyse logs by application
         $analyseLogs = collect($analyseLogs)->groupBy('application');
+
         foreach($analyseLogs as $application => $logs){
             $this->info('Dispatching job to analyse ' . count($analyseLogs) . ' from ' . $application);
             AnalyseException::dispatchSync($logs,$application);
         }
 
     }
-
+    /**
+     * Deletes the messages in bulk, to avoid data loss.
+     */
     private function deleteMessagesFromQueue(Collection $messages): void
     {
         foreach ($messages as $message) {

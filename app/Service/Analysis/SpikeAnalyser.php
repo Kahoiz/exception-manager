@@ -36,11 +36,7 @@ class SpikeAnalyser implements SpikeAnalyserInterface
 
         $spikeRules->save();
 
-        //save ema history
-        // Currently violates the SRP principle.
-        // The data is not used anywhere else in the application,
-        // nor do we anticipate it to be used in the near future.
-        // therefor we see no reason to extract this to a separate class.
+        //Store the ema for later
         DB::table('ema_history')->insert([
             'EMA'           => $ema,
             'count'         => $exceptionsCount,
