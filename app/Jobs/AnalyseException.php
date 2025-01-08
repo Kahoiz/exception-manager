@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Notifications\SpikeDetected;
+use App\Notifications\AnomalyDetected;
 use App\Service\ExceptionAnalyser;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -52,7 +52,7 @@ class AnalyseException implements ShouldQueue
         $cause->data = $data;
 
         // Notify the cause of the exceptions
-        $cause->notifyNow(new SpikeDetected());
+        $cause->notifyNow(new AnomalyDetected());
 
         $cause->data = json_encode($cause->data);
 

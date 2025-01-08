@@ -9,7 +9,7 @@ use Illuminate\Notifications\Slack\BlockKit\Blocks\SectionBlock;
 use Illuminate\Notifications\Slack\SlackMessage;
 use Illuminate\Notifications\Notification;
 
-class SpikeDetected extends Notification implements ShouldQueue
+class AnomalyDetected extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -37,7 +37,8 @@ class SpikeDetected extends Notification implements ShouldQueue
     {
         $requestException = false;
 
-        $headerMessage = $this->createHeaderMessage($notifiable);
+        $headerMessage = count($notifiable->data['anomalies']) > 1 ? 'Multiable anomalies Detected' :
+            $notifiable->data['anomalies']->keys()->first() . ' Detected';
 
         $message = (new SlackMessage)
             ->headerBlock(':rotating_light: ' . $headerMessage . ':rotating_light:')
@@ -55,7 +56,7 @@ class SpikeDetected extends Notification implements ShouldQueue
             });
         }
 
-        $this->addCauseSection($message, $notifiable->data);
+        $this->addAnomaliesSection($message, $notifiable->data);
 
         $this->addSimpleTypeSection($message, $notifiable->data);
 
@@ -90,29 +91,16 @@ class SpikeDetected extends Notification implements ShouldQueue
         ];
     }
 
-    private function createHeaderMessage(object $notifiable): string
+    private function addAnomaliesSection(SlackMessage $message, array $anomalies): void
     {
-        $headerMessage = 'no header found';
-
-        if (count($notifiable->data['causes']) > 1) {
-            $headerMessage = 'Multiple causes detected';
-        } else {
-            $headerMessage = array_key_first($notifiable->data['causes']);
-        }
-
-        return $headerMessage;
-    }
-
-    private function addCauseSection(SlackMessage $message, array $data): void
-    {
-        $message->sectionBlock(function (SectionBlock $section) use ($data) {
+        $message->sectionBlock(function (SectionBlock $section) use ($anomalies) {
             $section->text("*Anomalies:*")->markdown();
-            $causes = '';
+            $anomaly = '';
             // flatten the array so we can loop through it
-            foreach ($data['causes'] as $key => $item) {
-                $causes .= "$key: $item\n";
+            foreach ($anomalies as $key => $item) {
+                $anomaly .= "$key: $item\n";
             }
-            $section->field($causes);
+            $section->field($anomaly);
         });
     }
 
