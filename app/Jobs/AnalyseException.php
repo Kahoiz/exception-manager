@@ -67,12 +67,12 @@ class AnalyseException implements ShouldQueue
             $anomalies['Spike'] = "true";
         }
 
-        $value = $this->analyser->detectTypeAnomaly($exceptionLogs);
-        foreach ($value as $type => $frequency) {
-            if($frequency > 0) {
-                $anomalies[$type ."Anomaly"] = $frequency;
-            }
-        }
+//        $value = $this->analyser->detectTypeAnomaly($exceptionLogs);
+//        foreach ($value as $type => $frequency) {
+//            if($frequency > 0) {
+//                $anomalies[$type ."Anomaly"] = $frequency;
+//            }
+//        }
 
         return $anomalies;
     }
