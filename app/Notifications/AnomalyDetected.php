@@ -36,9 +36,10 @@ class AnomalyDetected extends Notification implements ShouldQueue
     public function toSlack(object $notifiable): SlackMessage
     {
         $requestException = false;
+        $anomalyCount = count($notifiable->data['anomalies']); // we use the multiple places, so we store it in a variable
 
-        $headerMessage = count($notifiable->data['anomalies']) > 1 ? 'Multiable anomalies Detected' :
-            $notifiable->data['anomalies']->keys()->first() . ' Detected';
+        $headerMessage = $anomalyCount > 1 ? 'Multiable anomalies Detected' :
+            $notifiable->data['anomalies'][0] . ' Detected'; // we only have one anomaly, therefore access array[0]
 
         $message = (new SlackMessage)
             ->headerBlock(':rotating_light: ' . $headerMessage . ':rotating_light:')
@@ -56,7 +57,9 @@ class AnomalyDetected extends Notification implements ShouldQueue
             });
         }
 
-        $this->addAnomaliesSection($message, $notifiable->data);
+        if($anomalyCount > 1){
+            $this->addAnomaliesSection($message, $notifiable->data['anomalies']);
+        }
 
         $this->addSimpleTypeSection($message, $notifiable->data);
 
@@ -97,8 +100,8 @@ class AnomalyDetected extends Notification implements ShouldQueue
             $section->text("*Anomalies:*")->markdown();
             $anomaly = '';
             // flatten the array so we can loop through it
-            foreach ($anomalies as $key => $item) {
-                $anomaly .= "$key: $item\n";
+            foreach ($anomalies as $key) {
+                $anomaly .= "$key\n";
             }
             $section->field($anomaly);
         });
