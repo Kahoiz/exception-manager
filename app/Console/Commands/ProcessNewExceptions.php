@@ -18,6 +18,7 @@ class ProcessNewExceptions extends Command
     protected $description = 'Empties a queue and spins up jobs in batches. Limitmax is 500';
     private CONST LIMIT = 500;
 
+
     public function handle(): void
     {
         $time = now()->format('Y-m-d H:i:s');
@@ -27,6 +28,8 @@ class ProcessNewExceptions extends Command
         $persistLogs = collect(); //to be inserted into the database
 
         $analyseLogs = collect(); //to be analysed
+
+        $messagesToSave = collect(); //to be deleted from the queue
         try {
             while ($message = Queue::pop('new-exception')) {
                 $log = $message->payload();
@@ -36,7 +39,7 @@ class ProcessNewExceptions extends Command
 
                 $analyseLogs->push($log);
 
-                $message->delete(); //the message is not deleted automatically
+                $messagesToSave->push($message);
 
                 if (count($persistLogs) >= $limit) {//prevent the command from potentially running out of memory
                     $this->dispatchJobs($persistLogs,$analyseLogs);
@@ -49,6 +52,7 @@ class ProcessNewExceptions extends Command
             if ($persistLogs->isNotEmpty()) {
                 $this->info("Queue is empty. Processing the remaining " . count($persistLogs) . " exceptions ");
                 $this->dispatchJobs($persistLogs,$analyseLogs);
+                $this->deleteMessagesFromQueue($messagesToSave);
             }
         }
     }
@@ -77,6 +81,13 @@ class ProcessNewExceptions extends Command
             AnalyseException::dispatchSync($logs,$application);
         }
 
+    }
+
+    private function deleteMessagesFromQueue(Collection $messages): void
+    {
+        foreach ($messages as $message) {
+            $message->delete();
+        }
     }
 
     /**

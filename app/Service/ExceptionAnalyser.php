@@ -48,7 +48,6 @@ class ExceptionAnalyser
             return [$key => $item->count()];
         })->toArray();
 
-
         if ($types->containsRequestException()) {
             CarrierHealthCheck::dispatch()->onQueue('health-check'); //to determine if carriers are alive
         }
