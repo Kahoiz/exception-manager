@@ -19,7 +19,7 @@ The application works on its own, however it doesnt do anything if the message b
 - change the messaging credentials to your own in the .env.
   All unhandled thrown exceptions will now be sent to the broker.
   
-  Now for the exception manager
+  # Now for the exception manager
   
 - Copy .env.example to .env
 - Change database and messaging credentials to your own in the .env.
